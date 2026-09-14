@@ -12,6 +12,8 @@ TBD
 
 ## Art
 
+- [Blocky Characters](https://kenney.nl/assets/blocky-characters) by [KenneyNL](https://kenney.nl/), [CC0] license.
+- [Isometric office](https://sketchfab.com/3d-models/isometric-office-d31464eed8044190911b221648aca432) by [Companion_Cube](https://sketchfab.com/Companion_Cube), [CC-BY 4.0] license.
 - Everything else done by [Diogo de Andrade], licensed through the [CC0] license.
 
 ## Sound
