@@ -1,0 +1,139 @@
+using UnityEngine;
+using UC;
+
+public class OrbitCameraController : MonoBehaviour
+{
+    public enum UpdateMode { Update = 0, FixedUpdate = 1, LateUpdate = 2 };
+    public enum FollowMode { Exponential = 0, Linear = 1 };
+
+    [SerializeField]
+    private Hypertag targetTag;
+    [SerializeField]
+    private Vector3 targetOffset = Vector3.zero;
+    [SerializeField]
+    private float distance = 10.0f;
+    [SerializeField]
+    private float angleX = 45.0f;
+    [SerializeField]
+    private float angleY = 0.0f;
+    [SerializeField]
+    private UpdateMode updateMode = UpdateMode.LateUpdate;
+    [SerializeField]
+    private FollowMode followMode = FollowMode.Exponential;
+    [SerializeField]
+    private float followFactor = 0.1f;
+    [SerializeField]
+    private float followSpeed = 10.0f;
+    [SerializeField]
+    private bool snapOnStart = true;
+    [SerializeField]
+    private bool displayFocusPoint = false;
+    [SerializeField]
+    private float displayFocusPointRadius = 0.25f;
+
+    public Vector3 focusPoint { get; private set; }
+
+    private Transform target;
+
+    public float GetDistance() => distance;
+    public void SetDistance(float v) { distance = v; }
+
+    public Vector2 GetAngles() => new Vector2(angleX, angleY);
+    public void SetAngles(float angleX, float angleY) { this.angleX = angleX; this.angleY = angleY; }
+
+    void Start()
+    {
+        FetchTarget();
+
+        if (snapOnStart)
+        {
+            Snap();
+        }
+        else
+        {
+            focusPoint = transform.position + transform.forward * distance;
+        }
+    }
+
+    void Update()
+    {
+        if (updateMode == UpdateMode.Update) Run_Update(Time.deltaTime);
+    }
+    void FixedUpdate()
+    {
+        if (updateMode == UpdateMode.FixedUpdate) Run_Update(Time.fixedDeltaTime);
+    }
+    void LateUpdate()
+    {
+        if (updateMode == UpdateMode.LateUpdate) Run_Update(Time.deltaTime);
+    }
+
+    void Run_Update(float deltaTime)
+    {
+        if (target == null)
+        {
+            FetchTarget();
+            if (target == null) return;
+        }
+
+        Vector3 targetPos = GetTargetPos();
+
+        // The focus point is what gets smoothed, the camera is always rigidly attached to it
+        switch (followMode)
+        {
+            case FollowMode.Exponential:
+                {
+                    Vector3 err = targetPos - focusPoint;
+                    focusPoint = focusPoint + err * followFactor;
+                }
+                break;
+            case FollowMode.Linear:
+                focusPoint = Vector3.MoveTowards(focusPoint, targetPos, followSpeed * deltaTime);
+                break;
+            default:
+                break;
+        }
+
+        PlaceCamera();
+    }
+
+    void PlaceCamera()
+    {
+        Quaternion rotation = Quaternion.Euler(angleX, angleY, 0.0f);
+
+        transform.position = focusPoint - rotation * Vector3.forward * distance;
+        transform.rotation = rotation;
+    }
+
+    // Moves the camera to the final position immediately, no smoothing
+    public void Snap()
+    {
+        if (target == null) FetchTarget();
+        if (target == null) return;
+
+        focusPoint = GetTargetPos();
+        PlaceCamera();
+    }
+
+    void FetchTarget()
+    {
+        if (targetTag == null) return;
+
+        target = Hypertag.FindFirstObjectWithHypertag<Transform>(targetTag);
+    }
+
+    Vector3 GetTargetPos()
+    {
+        return target.position + targetOffset;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (displayFocusPoint)
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(focusPoint, displayFocusPointRadius);
+            Gizmos.DrawLine(transform.position, focusPoint);
+        }
+    }
+}
