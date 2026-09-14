@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" fill="none" stroke="#000" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+  <!-- Head outline with ears -->
+  <polygon points="128,60 100,28 88,72 56,96 64,140 96,180 128,196 160,180 192,140 200,96 168,72 156,28" />
+  <!-- Inner ears -->
+  <polygon points="104,44 96,72 116,64" />
+  <polygon points="152,44 160,72 140,64" />
+  <!-- Brow / cheek fur lines -->
+  <polyline points="72,110 88,120 108,128" />
+  <polyline points="184,110 168,120 148,128" />
+  <!-- Eyes -->
+  <polygon points="96,120 108,112 116,124 104,128" />
+  <polygon points="160,120 148,112 140,124 152,128" />
+  <!-- Muzzle -->
+  <polyline points="108,128 96,160 128,176 160,160 148,128" />
+  <!-- Nose -->
+  <polygon points="118,168 138,168 128,178" />
+  <!-- Mouth -->
+  <polyline points="128,178 128,186" />
+  <polyline points="116,190 128,186 140,190" />
+</svg>

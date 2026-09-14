@@ -10,6 +10,31 @@ TBD
 
 * Everything
 
+## Concept pipeline
+
+Each drawable "concept" (e.g. the fox) is a `ConceptSO` asset (`Assets/Art/<Name>.asset`) holding three
+pieces of art, all in the same 256x256 space and the same pose so they overlay exactly:
+
+1. **Base SVG** (`Assets/Art/<name>.svg`) - clean outline, no fill, straight lines only (`polygon` /
+   `polyline`). Ask Claude for it: *"generate an SVG of a fox, just outlines, no color, straight lines only"*.
+   The straight-line constraint is what lets the "modelling" minigame read the shape back as line segments
+   (via `com.unity.vectorgraphics`' `SVGParser`, or by parsing the `points` attributes directly).
+2. **Sketch SVG** (`Assets/Art/<name>_sketch.svg`) - the same outline redrawn as a light-grey, wobbly,
+   hand-drawn version that the player traces. It is generated from the base SVG, not drawn by hand:
+
+   ```
+   python Tools/sketchify_svg.py Assets/Art/fox.svg Assets/Art/fox_sketch.svg
+   ```
+
+   Tweak `--seed`, `--wobble`, `--overshoot`, `--step`, `--passes` and `--color` as needed. Output is still
+   polyline-only, and each stroke id (`shapeN_edgeM_passP`) maps back to a source edge.
+3. **Concept art PNG** (`Assets/Art/<name>_concept.png`) - the "realistic" image the player is shown before
+   tracing. Ask Claude for an OpenAI image prompt describing the same subject in the same straight-on pose
+   (with a negative prompt to avoid side views, bodies, text), run it through the image generator and save
+   the result as a normal PNG.
+
+Then create/fill the `ConceptSO` asset with the three references.
+
 ## Art
 
 - [Blocky Characters](https://kenney.nl/assets/blocky-characters) by [KenneyNL](https://kenney.nl/), [CC0] license.
