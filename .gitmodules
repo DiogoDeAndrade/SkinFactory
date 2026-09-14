@@ -1,0 +1,4 @@
+[submodule "Assets/Externals/UnityCommon"]
+	path = Assets/Externals/UnityCommon
+	url = https://github.com/DiogoDeAndrade/UnityCommon
+	branch = unity6.6
