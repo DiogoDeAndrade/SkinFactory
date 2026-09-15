@@ -97,6 +97,15 @@ public class ModellingMG : MinigameUI
         UpdateUI();
     }
 
+    public override void ResetStation()
+    {
+        modelDone = false;
+        editingEnabled = false;
+        SetDrawing(null);
+        RefreshGraphic();
+        UpdateUI();
+    }
+
     // Needs a concept drawing to model, and is done once a model exists (submitted here, or a debug starting stage)
     public override bool CanUse(Player player)
     {

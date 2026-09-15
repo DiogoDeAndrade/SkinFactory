@@ -22,4 +22,7 @@ public abstract class MinigameUI : MonoBehaviour
     }
 
     public virtual bool CanUse(Player player) => true;
+
+    // Back to the initial state for a new day (nothing done, nothing carried over)
+    public virtual void ResetStation() { }
 }

@@ -114,6 +114,14 @@ public class PaintingMG : MinigameUI
         UpdateUI();
     }
 
+    public override void ResetStation()
+    {
+        paintDone = false;
+        paintingEnabled = false;
+        SetModel(null);
+        UpdateUI();
+    }
+
     // Needs a model to paint, and is done once a painting exists (submitted here, or a debug starting stage)
     public override bool CanUse(Player player)
     {
