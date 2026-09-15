@@ -1,10 +1,15 @@
+using NaughtyAttributes;
+using UC;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class Player : MonoBehaviour
 {
     MovementDirectionalXZ   movement;
     Minigame                currentMinigame;
     Animator                animator;
+    Idea                    nearbyIdea;     // Idea currently highlighted (in picking range)
+    DropArea                nearbyDropArea; // Drop area the player is standing in (outline lit)
 
     static int workingID = Animator.StringToHash("Working");
 
@@ -14,6 +19,21 @@ public class Player : MonoBehaviour
     [Header("Skin")]
     [SerializeField, Tooltip("Where the voxel-extruded skin is built once a painting exists")]
     private VoxelSkin   skin;
+
+    [Header("Interaction")]
+    [SerializeField, Min(0), Tooltip("Distance (XZ) within which an idea is highlighted and can be grabbed")]
+    private float       pickRange = 1.5f;
+    [SerializeField, ShowIf(nameof(needNewInputSystem))]
+    private PlayerInput playerInput;
+    [SerializeField, InputPlayer(nameof(playerInput)), Tooltip("Pressing it grabs the highlighted idea"), InputButton]
+    private UC.InputControl interactInput;
+    [SerializeField, Tooltip("Where a grabbed idea is parented (on top of the player)")]
+    private Transform   holdPoint;
+
+    public bool needNewInputSystem => (interactInput != null) && (interactInput.type == UC.InputControl.InputType.NewInput);
+
+    // Idea the player is carrying (null when not carrying one)
+    public Idea heldIdea { get; private set; }
 
     [Header("Debug")]
     [SerializeField, Tooltip("Start already carrying this drawing (a PNG saved by the concept station), skipping that station")]
@@ -51,6 +71,19 @@ public class Player : MonoBehaviour
         else Debug.LogWarning("Player: no VoxelSkin in the scene, the skin was not built", this);
     }
 
+    // Drops everything carried (new day): drawing, model, painting and the built skin
+    public void ResetPipeline()
+    {
+        if (conceptDrawing != null) Destroy(conceptDrawing);
+        conceptDrawing = null;
+        conceptDrawingSource = null;
+        modelPolygons = null;
+        if (painting != null) Destroy(painting);
+        painting = null;
+        if (skin == null) skin = FindAnyObjectByType<VoxelSkin>();
+        if (skin != null) skin.Clear();
+    }
+
     public void SetConceptDrawing(Texture2D drawing, ConceptSO source)
     {
         if ((conceptDrawing != null) && (conceptDrawing != drawing)) Destroy(conceptDrawing);
@@ -63,6 +96,9 @@ public class Player : MonoBehaviour
     {
         animator = GetComponentInChildren<Animator>();
         movement = GetComponent<MovementDirectionalXZ>();
+
+        if (interactInput != null) interactInput.playerInput = playerInput;
+        if (holdPoint == null) holdPoint = transform;
 
         if (debugConceptDrawing != null)
         {
@@ -91,6 +127,94 @@ public class Player : MonoBehaviour
         }
 
         animator.SetBool(workingID, (currentMinigame != null));
+
+        UpdateIdeaInteraction();
+    }
+
+    // Highlights the nearest idea in range and the drop area the player stands in, if it takes the carried idea.
+    // The interaction key drops the carried idea into the area (trash destroys it), or grabs the nearby idea.
+    void UpdateIdeaInteraction()
+    {
+        Idea nearest = (heldIdea == null) ? Idea.GetNearest(transform.position, pickRange) : null;
+
+        if (nearbyIdea != nearest)
+        {
+            if (nearbyIdea != null) nearbyIdea.SetHighlight(false);
+            nearbyIdea = nearest;
+            if (nearbyIdea != null) nearbyIdea.SetHighlight(true);
+        }
+
+        // Only an area the carried idea can actually be dropped into lights up
+        DropArea area = (heldIdea != null) ? DropArea.GetAt(transform.position) : null;
+        if ((area != null) && !area.Accepts(heldIdea)) area = null;
+
+        if (nearbyDropArea != area)
+        {
+            if (nearbyDropArea != null) nearbyDropArea.SetHighlight(false);
+            nearbyDropArea = area;
+            if (nearbyDropArea != null) nearbyDropArea.SetHighlight(true);
+        }
+
+        if ((interactInput == null) || !interactInput.IsDown()) return;
+
+        if ((heldIdea != null) && (nearbyDropArea != null))
+        {
+            DropIdeaInto(nearbyDropArea);
+        }
+        else if (nearbyIdea != null)
+        {
+            GrabIdea(nearbyIdea);
+        }
+    }
+
+    // Trash destroys the carried idea; other areas take it if it is in their library, swapping with whatever
+    // they already hold. Returns false when the area does not accept the idea.
+    public bool DropIdeaInto(DropArea area)
+    {
+        if ((heldIdea == null) || (area == null)) return false;
+        if (!area.Accepts(heldIdea)) return false;
+
+        if (area.IsTrash)
+        {
+            Idea trashed = heldIdea;
+            heldIdea = null;
+            Destroy(trashed.gameObject);
+            area.Punch();
+            return true;
+        }
+
+        Idea previous = area.Current;
+        Idea dropped = heldIdea;
+        heldIdea = null;
+
+        if (previous != null) area.Clear(previous);
+        area.Place(dropped);
+
+        if (previous != null) GrabIdea(previous);
+
+        return true;
+    }
+
+    public void GrabIdea(Idea idea)
+    {
+        if (idea == null) return;
+        if (heldIdea == idea) return;
+
+        DropIdea();
+
+        heldIdea = idea;
+        heldIdea.Grab(holdPoint);
+
+        if (nearbyIdea == idea) nearbyIdea = null;
+    }
+
+    // Lets go of the carried idea, leaving it where it is
+    public void DropIdea()
+    {
+        if (heldIdea == null) return;
+
+        heldIdea.Release();
+        heldIdea = null;
     }
 
     void EnableMinigame()
