@@ -21,6 +21,7 @@ Ongoing:
 
 * More skins (beyond the fox)
 * Improve explanation of regions
+* Assist: show an idea's categories (tags) on its balloon, not just the name
 
 ## Concept pipeline
 
