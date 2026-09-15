@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" fill="none" stroke="#000" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+  <!-- Front-facing owl head: round face with ear tufts and large ringed eyes -->
+  <!-- Head silhouette, tufts included -->
+  <polygon points="52,44 84,68 128,60 172,68 204,44 206,96 210,140 194,182 162,206 128,212 94,206 62,182 46,140 50,96" />
+  <!-- Facial discs around the eyes -->
+  <polygon points="124,118 115,139 94,148 73,139 64,118 73,97 94,88 115,97" />
+  <polygon points="192,118 183,139 162,148 141,139 132,118 141,97 162,88 183,97" />
+  <!-- Eyes -->
+  <polygon points="108,118 104,128 94,132 84,128 80,118 84,108 94,104 104,108" />
+  <polygon points="176,118 172,128 162,132 152,128 148,118 152,108 162,104 172,108" />
+  <!-- Pupils -->
+  <polygon points="94,113 99,118 94,123 89,118" />
+  <polygon points="162,113 167,118 162,123 157,118" />
+  <!-- Beak -->
+  <polygon points="118,144 138,144 128,170" />
+  <!-- Chest feathers -->
+  <polyline points="96,182 112,192 128,184 144,192 160,182" />
+</svg>

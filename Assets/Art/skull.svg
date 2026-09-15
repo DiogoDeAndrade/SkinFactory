@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" fill="none" stroke="#000" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+  <!-- Front-facing skull: cranium, eye sockets, nasal cavity and teeth -->
+  <!-- Skull silhouette -->
+  <polygon points="128,28 96,34 70,54 56,84 54,116 62,146 78,160 84,190 96,206 128,210 160,206 172,190 178,160 194,146 202,116 200,84 186,54 160,34" />
+  <!-- Eye sockets -->
+  <polygon points="74,104 96,96 116,108 112,130 90,134 72,122" />
+  <polygon points="182,104 160,96 140,108 144,130 166,134 184,122" />
+  <!-- Nasal cavity -->
+  <polygon points="120,144 128,130 136,144 132,160 124,160" />
+  <!-- Teeth -->
+  <polyline points="92,176 164,176" />
+  <polyline points="96,196 160,196" />
+  <polyline points="104,176 104,196" />
+  <polyline points="116,176 116,196" />
+  <polyline points="128,176 128,196" />
+  <polyline points="140,176 140,196" />
+  <polyline points="152,176 152,196" />
+  <!-- Crack -->
+  <polyline points="150,40 158,56 150,68 160,80" />
+</svg>

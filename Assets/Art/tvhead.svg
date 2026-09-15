@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" fill="none" stroke="#000" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+  <!-- Front-facing TV head: CRT box with a screen face, rabbit-ear antenna, knobs and speaker -->
+  <!-- Box silhouette -->
+  <polygon points="56,72 200,72 208,80 208,192 200,200 56,200 48,192 48,80" />
+  <!-- Antenna base and rabbit ears -->
+  <polygon points="118,72 138,72 134,64 122,64" />
+  <polyline points="128,64 92,22" />
+  <polyline points="128,64 168,18" />
+  <!-- Screen -->
+  <polygon points="64,88 168,88 172,92 172,184 168,188 64,188 60,184 60,92" />
+  <!-- Face on screen -->
+  <polygon points="88,120 104,120 104,140 88,140" />
+  <polygon points="128,120 144,120 144,140 128,140" />
+  <polyline points="92,158 104,168 116,172 128,172 140,168 152,158" />
+  <!-- Knobs -->
+  <polygon points="190,103 197,110 190,117 183,110" />
+  <polygon points="190,133 197,140 190,147 183,140" />
+  <!-- Speaker slots -->
+  <polyline points="182,160 198,160" />
+  <polyline points="182,168 198,168" />
+  <polyline points="182,176 198,176" />
+</svg>

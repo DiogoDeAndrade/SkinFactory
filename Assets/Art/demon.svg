@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" fill="none" stroke="#000" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+  <!-- Front-facing demon head: horns, angry brows, narrow eyes and a fanged grin -->
+  <!-- Head silhouette -->
+  <polygon points="68,64 88,74 128,68 168,74 188,64 200,104 200,150 178,186 150,206 128,214 106,206 78,186 56,150 56,104" />
+  <!-- Horns -->
+  <polyline points="70,66 60,48 58,28 64,10 68,28 76,48 90,72" />
+  <polyline points="186,66 196,48 198,28 192,10 188,28 180,48 166,72" />
+  <!-- Brows -->
+  <polyline points="84,104 116,116" />
+  <polyline points="172,104 140,116" />
+  <!-- Eyes (narrow, slanted) -->
+  <polygon points="88,112 112,120 108,130 86,124" />
+  <polygon points="168,112 144,120 148,130 170,124" />
+  <!-- Pupils -->
+  <polygon points="100,117 104,122 99,126 95,121" />
+  <polygon points="156,117 152,122 157,126 161,121" />
+  <!-- Nostrils -->
+  <polygon points="116,148 124,146 122,154" />
+  <polygon points="140,148 132,146 134,154" />
+  <!-- Grin -->
+  <polyline points="84,164 106,176 128,180 150,176 172,164" />
+  <!-- Fangs -->
+  <polygon points="98,172 112,176 104,190" />
+  <polygon points="158,172 144,176 152,190" />
+</svg>

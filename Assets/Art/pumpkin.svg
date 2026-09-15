@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" fill="none" stroke="#000" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+  <!-- Front-facing jack-o'-lantern: ridged pumpkin with stem, carved eyes, nose and jagged mouth -->
+  <!-- Pumpkin silhouette -->
+  <polygon points="40,120 52,84 84,62 128,56 172,62 204,84 216,120 212,160 192,192 160,210 128,214 96,210 64,192 44,160" />
+  <!-- Stem -->
+  <polyline points="116,57 114,34 124,22 138,26 140,58" />
+  <!-- Ridges -->
+  <polyline points="80,70 56,124 78,196" />
+  <polyline points="176,70 200,124 178,196" />
+  <!-- Eyes -->
+  <polygon points="76,104 108,100 96,130" />
+  <polygon points="180,104 148,100 160,130" />
+  <!-- Nose -->
+  <polygon points="116,152 140,152 128,132" />
+  <!-- Jagged mouth -->
+  <polygon points="72,160 86,172 98,158 114,176 128,164 142,176 158,158 172,172 184,160 174,186 156,180 144,196 112,196 100,180 82,186" />
+</svg>

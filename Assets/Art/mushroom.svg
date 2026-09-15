@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" fill="none" stroke="#000" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+  <!-- Front-facing mushroom character: spotted cap over a stem with a face -->
+  <!-- Cap -->
+  <polygon points="36,124 44,92 68,60 100,40 128,34 156,40 188,60 212,92 220,124 196,132 160,136 128,138 96,136 60,132" />
+  <!-- Cap spots -->
+  <polygon points="94,90 87,102 73,102 66,90 73,78 87,78" />
+  <polygon points="140,60 134,70 122,70 116,60 122,50 134,50" />
+  <polygon points="188,96 182,106 170,106 164,96 170,86 182,86" />
+  <!-- Stem -->
+  <polyline points="92,136 82,176 86,210 128,220 170,210 174,176 164,136" />
+  <!-- Eyes -->
+  <polygon points="116,164 112,171 104,171 100,164 104,157 112,157" />
+  <polygon points="156,164 152,171 144,171 140,164 144,157 152,157" />
+  <!-- Pupils -->
+  <polygon points="108,160 112,164 108,168 104,164" />
+  <polygon points="148,160 152,164 148,168 144,164" />
+  <!-- Mouth -->
+  <polyline points="112,190 120,198 136,198 144,190" />
+</svg>

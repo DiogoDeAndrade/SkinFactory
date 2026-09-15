@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" fill="none" stroke="#000" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+  <!-- Front-facing cat head: wide face with two pointed ears -->
+  <!-- Head silhouette, ears included -->
+  <polygon points="56,40 84,72 128,66 172,72 200,40 204,112 196,150 168,186 128,196 88,186 60,150 52,112" />
+  <!-- Inner ears -->
+  <polygon points="60,56 75,73 57,95" />
+  <polygon points="196,56 181,73 199,95" />
+  <!-- Eyes (almonds) -->
+  <polygon points="84,118 98,110 112,118 98,126" />
+  <polygon points="172,118 158,110 144,118 158,126" />
+  <!-- Pupils (vertical slits) -->
+  <polygon points="98,112 101,118 98,124 95,118" />
+  <polygon points="158,112 161,118 158,124 155,118" />
+  <!-- Nose -->
+  <polygon points="120,146 136,146 128,154" />
+  <!-- Mouth -->
+  <polyline points="128,154 128,160" />
+  <polyline points="112,164 120,168 128,160 136,168 144,164" />
+  <!-- Whiskers -->
+  <polyline points="38,136 86,146" />
+  <polyline points="34,152 86,152" />
+  <polyline points="40,168 86,158" />
+  <polyline points="218,136 170,146" />
+  <polyline points="222,152 170,152" />
+  <polyline points="216,168 170,158" />
+</svg>

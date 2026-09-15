@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" fill="none" stroke="#000" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+  <!-- Front-facing robot head: boxy head with antenna, side bolts and a mouth grille -->
+  <!-- Head silhouette -->
+  <polygon points="64,64 192,64 200,72 200,192 192,200 64,200 56,192 56,72" />
+  <!-- Antenna -->
+  <polygon points="128,28 136,36 128,44 120,36" />
+  <polyline points="128,44 128,64" />
+  <!-- Side bolts -->
+  <polygon points="40,104 56,104 56,144 40,144" />
+  <polygon points="200,104 216,104 216,144 200,144" />
+  <!-- Panel seam -->
+  <polyline points="72,80 184,80" />
+  <!-- Eyes -->
+  <polygon points="80,92 116,92 116,124 80,124" />
+  <polygon points="140,92 176,92 176,124 140,124" />
+  <!-- Pupils -->
+  <polygon points="92,102 106,102 106,114 92,114" />
+  <polygon points="150,102 164,102 164,114 150,114" />
+  <!-- Mouth grille -->
+  <polygon points="84,148 172,148 172,176 84,176" />
+  <polyline points="106,148 106,176" />
+  <polyline points="128,148 128,176" />
+  <polyline points="150,148 150,176" />
+</svg>
