@@ -30,13 +30,27 @@ public class OrbitCameraController : MonoBehaviour
     private bool displayFocusPoint = false;
     [SerializeField]
     private float displayFocusPointRadius = 0.25f;
+    [SerializeField, Tooltip("How fast the zoom factor eases towards its target (higher = snappier)")]
+    private float zoomSpeed = 4.0f;
 
     public Vector3 focusPoint { get; private set; }
 
     private Transform target;
+    private float targetZoom = 1.0f;    // Requested zoom factor (1 = the configured distance)
+    private float currentZoom = 1.0f;   // Smoothed zoom factor actually applied
 
+    // Base distance, before zoom
     public float GetDistance() => distance;
     public void SetDistance(float v) { distance = v; }
+
+    // Zoom factor multiplies the base distance; smoothed over time, so setting it repeatedly is harmless
+    public float zoomFactor
+    {
+        get => targetZoom;
+        set => targetZoom = Mathf.Max(0.01f, value);
+    }
+    public float currentZoomFactor => currentZoom;
+    public float GetCurrentDistance() => distance * currentZoom;
 
     public Vector2 GetAngles() => new Vector2(angleX, angleY);
     public void SetAngles(float angleX, float angleY) { this.angleX = angleX; this.angleY = angleY; }
@@ -78,6 +92,9 @@ public class OrbitCameraController : MonoBehaviour
 
         Vector3 targetPos = GetTargetPos();
 
+        // Ease the zoom factor towards the requested one (frame-rate independent exponential)
+        currentZoom = Mathf.Lerp(currentZoom, targetZoom, 1.0f - Mathf.Exp(-zoomSpeed * deltaTime));
+
         // The focus point is what gets smoothed, the camera is always rigidly attached to it
         switch (followMode)
         {
@@ -101,7 +118,7 @@ public class OrbitCameraController : MonoBehaviour
     {
         Quaternion rotation = Quaternion.Euler(angleX, angleY, 0.0f);
 
-        transform.position = focusPoint - rotation * Vector3.forward * distance;
+        transform.position = focusPoint - rotation * Vector3.forward * (distance * currentZoom);
         transform.rotation = rotation;
     }
 
@@ -112,6 +129,7 @@ public class OrbitCameraController : MonoBehaviour
         if (target == null) return;
 
         focusPoint = GetTargetPos();
+        currentZoom = targetZoom;
         PlaceCamera();
     }
 

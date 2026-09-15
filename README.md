@@ -8,7 +8,14 @@ TBD
 
 ## Todo
 
-* Everything
+* Coding minigame
+* Marketing minigame
+* Boss with demands
+* Water system (we need water periodically)
+* Main game loop: time limit for skin, success assessment
+* More skins (beyond the fox)
+* Launch button
+* Brainstorm minigame
 
 ## Concept pipeline
 
