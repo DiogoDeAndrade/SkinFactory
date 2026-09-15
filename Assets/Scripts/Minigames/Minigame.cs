@@ -30,6 +30,7 @@ public abstract partial class Minigame : MonoBehaviour
     {
         foreach (var mg in minigames)
         {
+            if (!mg.CanUse()) continue;
             if (Vector3.Distance(mg.transform.position.x0z(), t.position.x0z()) < mg.radius)
             {
                 if (Vector3.Angle(mg.transform.forward, -t.forward) < mg.angularTolerance)
@@ -44,6 +45,8 @@ public abstract partial class Minigame : MonoBehaviour
 
     public abstract void Activate();
     public abstract void Deactivate();
+    public abstract bool CanUse();
+
 
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected()

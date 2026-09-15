@@ -3,24 +3,13 @@ using UnityEngine;
 
 public abstract class MinigameUI : MonoBehaviour
 {
-    [SerializeField] private ConceptSO concept;
-
-    CanvasGroup canvasGroup;
+    protected CanvasGroup canvasGroup;
 
     protected virtual void Start()
     {
         canvasGroup = GetComponent<CanvasGroup>();
         canvasGroup.alpha = 0.0f;
-
-        Set(concept);
-    }
-
-    void Set(ConceptSO concept)
-    {
-        this.concept = concept;
-
-        if (concept == null) return;
-    }
+    }    
 
     public virtual void Activate()
     {
@@ -31,4 +20,6 @@ public abstract class MinigameUI : MonoBehaviour
     {
         canvasGroup.FadeOut(0.15f);
     }
+
+    public virtual bool CanUse() => true;
 }

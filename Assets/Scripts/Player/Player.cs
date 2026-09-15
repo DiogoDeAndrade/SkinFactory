@@ -8,6 +8,18 @@ public class Player : MonoBehaviour
 
     static int workingID = Animator.StringToHash("Working");
 
+    // Drawing produced in the concept art station (owned by the player, destroyed on replace)
+    public Texture2D    conceptDrawing { get; private set; }
+    public ConceptSO    conceptDrawingSource { get; private set; }
+
+    public void SetConceptDrawing(Texture2D drawing, ConceptSO source)
+    {
+        if ((conceptDrawing != null) && (conceptDrawing != drawing)) Destroy(conceptDrawing);
+
+        conceptDrawing = drawing;
+        conceptDrawingSource = source;
+    }
+
     private void Start()
     {
         animator = GetComponentInChildren<Animator>();
@@ -51,5 +63,10 @@ public class Player : MonoBehaviour
     {
         currentMinigame?.Deactivate();
         currentMinigame = null;
+    }
+
+    void OnDestroy()
+    {
+        if (conceptDrawing != null) Destroy(conceptDrawing);
     }
 }
