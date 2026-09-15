@@ -21,5 +21,5 @@ public abstract class MinigameUI : MonoBehaviour
         canvasGroup.FadeOut(0.15f);
     }
 
-    public virtual bool CanUse() => true;
+    public virtual bool CanUse(Player player) => true;
 }

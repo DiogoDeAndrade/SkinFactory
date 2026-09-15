@@ -26,11 +26,13 @@ public abstract partial class Minigame : MonoBehaviour
         minigames.Remove(this);
     }
 
-    static public Minigame GetMinigame(Transform t)
+    static public Minigame GetMinigame(Player player)
     {
+        Transform t = player.transform;
+
         foreach (var mg in minigames)
         {
-            if (!mg.CanUse()) continue;
+            if (!mg.CanUse(player)) continue;
             if (Vector3.Distance(mg.transform.position.x0z(), t.position.x0z()) < mg.radius)
             {
                 if (Vector3.Angle(mg.transform.forward, -t.forward) < mg.angularTolerance)
@@ -45,7 +47,7 @@ public abstract partial class Minigame : MonoBehaviour
 
     public abstract void Activate();
     public abstract void Deactivate();
-    public abstract bool CanUse();
+    public abstract bool CanUse(Player player);
 
 
 #if UNITY_EDITOR

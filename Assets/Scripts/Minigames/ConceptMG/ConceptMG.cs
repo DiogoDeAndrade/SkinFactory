@@ -32,6 +32,12 @@ public class ConceptMG : MinigameUI
     [SerializeField, Range(0, 1)] private float sketchAlphaThreshold = 0.1f;    // Sketch pixel counts as painted above this alpha
     [SerializeField, Range(0, 1)] private float minScoreToSubmit = 0.3f;        // Submit button is interactable from this score up
 
+#if UNITY_EDITOR
+    [Header("Debug (editor only)")]
+    [SerializeField] private bool               saveDrawingOnSubmit = false;            // Writes the submitted drawing as a PNG
+    [SerializeField] private string             saveDrawingFolder = "Assets/Art/Debug"; // Project-relative folder for the PNG
+#endif
+
     // Sketch analysis (at sketch resolution)
     Texture2D   sketchTexture;
     int         sketchWidth;
@@ -244,7 +250,7 @@ public class ConceptMG : MinigameUI
             if (painted[i]) sketchPaintedPixels++;
         }
 
-        distanceField = ComputeDistanceField(painted, sketchWidth, sketchHeight);
+        distanceField = DistanceField.Compute(painted, sketchWidth, sketchHeight);
 
         // Painted sketch pixels at draw resolution: a draw pixel counts if any sketch pixel under it is painted.
         // This is the denominator for the score, so a perfect trace scores ~1.
@@ -317,76 +323,6 @@ public class ConceptMG : MinigameUI
         distanceField = null;
         sketchPaintedPixels = 0;
         sketchPaintedPixelsDraw = 0;
-    }
-
-    // Unsigned Euclidean distance transform (8SSEDT / Danielsson): distance from every pixel to the nearest painted pixel
-    static float[] ComputeDistanceField(bool[] painted, int width, int height)
-    {
-        const int inf = 1 << 20;
-        int n = width * height;
-        var dx = new int[n];
-        var dy = new int[n];
-        for (int i = 0; i < n; i++)
-        {
-            dx[i] = painted[i] ? 0 : inf;
-            dy[i] = painted[i] ? 0 : inf;
-        }
-
-        long DistSq(int i) => (long)dx[i] * dx[i] + (long)dy[i] * dy[i];
-
-        void Compare(int x, int y, int ox, int oy)
-        {
-            int nx = x + ox, ny = y + oy;
-            if (nx < 0 || ny < 0 || nx >= width || ny >= height) return;
-            int i = y * width + x;
-            int j = ny * width + nx;
-            int cdx = dx[j] + ox;
-            int cdy = dy[j] + oy;
-            long candidate = (long)cdx * cdx + (long)cdy * cdy;
-            if (candidate < DistSq(i))
-            {
-                dx[i] = cdx;
-                dy[i] = cdy;
-            }
-        }
-
-        // Pass 1
-        for (int y = 0; y < height; y++)
-        {
-            for (int x = 0; x < width; x++)
-            {
-                Compare(x, y, -1, 0);
-                Compare(x, y, 0, -1);
-                Compare(x, y, -1, -1);
-                Compare(x, y, 1, -1);
-            }
-            for (int x = width - 1; x >= 0; x--)
-            {
-                Compare(x, y, 1, 0);
-            }
-        }
-        // Pass 2
-        for (int y = height - 1; y >= 0; y--)
-        {
-            for (int x = width - 1; x >= 0; x--)
-            {
-                Compare(x, y, 1, 0);
-                Compare(x, y, 0, 1);
-                Compare(x, y, -1, 1);
-                Compare(x, y, 1, 1);
-            }
-            for (int x = 0; x < width; x++)
-            {
-                Compare(x, y, -1, 0);
-            }
-        }
-
-        var result = new float[n];
-        for (int i = 0; i < n; i++)
-        {
-            result[i] = Mathf.Sqrt((float)DistSq(i));
-        }
-        return result;
     }
 
     #endregion
@@ -525,7 +461,7 @@ public class ConceptMG : MinigameUI
         wasPressed = false;
         drawDone = true;
 
-        var player = FindFirstObjectByType<Player>();
+        var player = FindAnyObjectByType<Player>();
         if (player != null)
         {
             player.SetConceptDrawing(CreateDrawingCopy(), concept);
@@ -535,8 +471,27 @@ public class ConceptMG : MinigameUI
             Debug.LogWarning("ConceptMG: no Player found to store the drawing", this);
         }
 
+#if UNITY_EDITOR
+        if (saveDrawingOnSubmit) SaveDrawingPNG();
+#endif
+
         canvasGroup.FadeOut(0.1f);
     }
+
+#if UNITY_EDITOR
+    // Debug helper: saves the drawing so it can be assigned to Player.debugConceptDrawing and the concept station skipped
+    void SaveDrawingPNG()
+    {
+        if (drawTexture == null) return;
+
+        string folder = DebugAssetUtils.NormalizeFolder(saveDrawingFolder);
+        string name = (concept != null) ? concept.name : "Concept";
+        string path = $"{folder}/{name}_drawing.png";
+
+        DebugAssetUtils.SavePNG(drawTexture, path);
+        Debug.Log($"ConceptMG: drawing saved to {path}", this);
+    }
+#endif
 
     // Standalone copy of the drawing, so later Set/Clear calls don't touch what the player keeps
     Texture2D CreateDrawingCopy()
@@ -554,5 +509,6 @@ public class ConceptMG : MinigameUI
         return copy;
     }
 
-    public override bool CanUse() => !drawDone;
+    // Not usable once submitted, or when the player already carries a drawing (e.g. a debug starting stage)
+    public override bool CanUse(Player player) => !drawDone && ((player == null) || (player.conceptDrawing == null));
 }

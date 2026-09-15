@@ -22,8 +22,8 @@ public partial class MinigameRedirectToUI : Minigame
         actualMinigame?.Deactivate();
     }
 
-    public override bool CanUse()
+    public override bool CanUse(Player player)
     {
-        return actualMinigame?.CanUse() ?? false;
+        return actualMinigame?.CanUse(player) ?? false;
     }
 }
