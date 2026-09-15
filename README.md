@@ -10,14 +10,12 @@ TBD
 
 * Coding minigame
 * Marketing minigame
-* Boss with demands
+* Boss demands (stretch goal): from a certain point on the boss roams the office; touching the player adds
+  demands to the skin (make it blue, only half the segments, ...)
 * Water system (we need water periodically)
-* Main game loop: time limit for skin, success assessment
-* More skins (beyond the fox)
+* Main game loop: test and wire the time limit and the launch in-game; success assessment
+* More skins (beyond the fox) - in progress
 * Launch button
-* Brainstorm minigame
-* Signposting next task
-* Add boss emotes
 * Improve explanation of regions
 
 ## Concept pipeline
