@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" fill="none" stroke="#000" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+  <!-- Front-facing frog head: wide face with two eye bumps on top -->
+  <!-- Head silhouette, bumps included -->
+  <polygon points="40,140 48,100 62,76 74,60 92,54 110,60 120,76 128,82 136,76 146,60 164,54 182,60 194,76 208,100 216,140 200,176 168,200 128,208 88,200 56,176" />
+  <!-- Eyes (octagons inside the bumps) -->
+  <polygon points="92,60 105,65 110,78 105,91 92,96 79,91 74,78 79,65" />
+  <polygon points="164,60 177,65 182,78 177,91 164,96 151,91 146,78 151,65" />
+  <!-- Pupils (vertical slits) -->
+  <polygon points="92,68 97,78 92,88 87,78" />
+  <polygon points="164,68 169,78 164,88 159,78" />
+  <!-- Nostrils -->
+  <polygon points="114,126 122,126 118,132" />
+  <polygon points="134,126 142,126 138,132" />
+  <!-- Wide mouth -->
+  <polyline points="60,150 80,166 110,172 128,174 146,172 176,166 196,150" />
+</svg>

@@ -3667,7 +3667,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a077e298b84ca13468f5b7a3fa46bd23, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ConceptMG
-  concept: {fileID: 11400000, guid: c3f5a1230dd98ab49b87bfbba206e0e5, type: 2}
+  concept: {fileID: 11400000, guid: 3b7528ef645bf75439add2ed2df3b854, type: 2}
   conceptImage: {fileID: 555518233}
   sketchImage: {fileID: 1595313471}
   drawImage: {fileID: 62004828}
@@ -8462,10 +8462,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player
   skin: {fileID: 0}
-  debugConceptDrawing: {fileID: 0}
-  debugConceptSource: {fileID: 0}
-  debugModel: {fileID: 0}
-  debugPainting: {fileID: 0}
+  debugConceptDrawing: {fileID: 2800000, guid: 081e6cb61dbafd149879e90f75d56feb, type: 3}
+  debugConceptSource: {fileID: 11400000, guid: 3b7528ef645bf75439add2ed2df3b854, type: 2}
+  debugModel: {fileID: 11400000, guid: 52dab16860f64554088de533eff7f1d9, type: 2}
+  debugPainting: {fileID: 2800000, guid: bbe1964fe781ff6488d418996aa36269, type: 3}
 --- !u!1 &1549525532
 GameObject:
   m_ObjectHideFlags: 0
@@ -9638,8 +9638,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1797320399}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0.8829476, z: -0.4694715, w: 0}
-  m_LocalPosition: {x: 10, y: 14, z: -8}
+  m_LocalRotation: {x: -0.46471334, y: 0.0018302157, z: -0.0009923882, w: -0.8854587}
+  m_LocalPosition: {x: 9.288919, y: 13.419881, z: -31.626255}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
