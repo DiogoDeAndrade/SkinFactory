@@ -8,6 +8,10 @@ public class Player : MonoBehaviour
 
     static int workingID = Animator.StringToHash("Working");
 
+    [Header("Skin")]
+    [SerializeField, Tooltip("Where the voxel-extruded skin is built once a painting exists")]
+    private VoxelSkin   skin;
+
     [Header("Debug")]
     [SerializeField, Tooltip("Start already carrying this drawing (a PNG saved by the concept station), skipping that station")]
     private Texture2D   debugConceptDrawing;
@@ -15,6 +19,8 @@ public class Player : MonoBehaviour
     private ConceptSO   debugConceptSource;
     [SerializeField, Tooltip("Start already carrying this model (saved by the modelling station), skipping the concept and modelling stations. Overrides the debug drawing above.")]
     private ModelDataSO debugModel;
+    [SerializeField, Tooltip("Start already carrying this painting (a PNG saved by the painting station), skipping all three stations. Needs the debug model above for the earlier data.")]
+    private Texture2D   debugPainting;
 
     // Drawing produced in the concept art station (owned by the player, destroyed on replace)
     public Texture2D    conceptDrawing { get; private set; }
@@ -26,6 +32,20 @@ public class Player : MonoBehaviour
     public void SetModel(Vector2[][] polygons)
     {
         modelPolygons = polygons;
+    }
+
+    // Painting produced in the painting station: palette colors per pixel, transparent outside the skin
+    public Texture2D    painting { get; private set; }
+
+    public void SetPainting(Texture2D painting)
+    {
+        if ((this.painting != null) && (this.painting != painting)) Destroy(this.painting);
+
+        this.painting = painting;
+
+        if (skin == null) skin = FindAnyObjectByType<VoxelSkin>();
+        if (skin != null) skin.Build(painting);
+        else Debug.LogWarning("Player: no VoxelSkin in the scene, the skin was not built", this);
     }
 
     public void SetConceptDrawing(Texture2D drawing, ConceptSO source)
@@ -49,6 +69,10 @@ public class Player : MonoBehaviour
         {
             if (debugModel.Drawing != null) SetConceptDrawing(TextureUtils.ReadableCopy(debugModel.Drawing, "Debug concept drawing"), debugModel.Concept);
             SetModel(debugModel.GetPolygons());
+        }
+        if (debugPainting != null)
+        {
+            SetPainting(TextureUtils.ReadableCopy(debugPainting, "Debug painting"));
         }
     }
 
@@ -94,5 +118,6 @@ public class Player : MonoBehaviour
     void OnDestroy()
     {
         if (conceptDrawing != null) Destroy(conceptDrawing);
+        if (painting != null) Destroy(painting);
     }
 }

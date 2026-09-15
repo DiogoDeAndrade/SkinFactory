@@ -17,3 +17,4 @@ MonoBehaviour:
   conceptArt: {fileID: 21300000, guid: e55d5cec9d9da6f4188976e4e3974ba9, type: 3}
   segmentBudget: 40
   minClosedRegions: 5
+  minColors: 3

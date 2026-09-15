@@ -28,20 +28,7 @@ public static class RegionCounter
         int res = Mathf.Max(8, resolution);
         int n = res * res;
         var wall = new bool[n];
-
-        foreach (var seg in segments)
-        {
-            Vector2 a = seg.a * res;
-            Vector2 b = seg.b * res;
-            int steps = Mathf.Max(1, Mathf.CeilToInt(Vector2.Distance(a, b) / 0.5f));
-            for (int s = 0; s <= steps; s++)
-            {
-                Vector2 p = Vector2.Lerp(a, b, (float)s / steps);
-                int x = Mathf.Clamp((int)p.x, 0, res - 1);
-                int y = Mathf.Clamp((int)p.y, 0, res - 1);
-                wall[y * res + x] = true;
-            }
-        }
+        Rasterize(segments, wall, res);
 
         var visited = new bool[n];
         var queue = new Queue<int>();
@@ -70,6 +57,25 @@ public static class RegionCounter
         }
 
         return count;
+    }
+
+    // Marks the pixels the segments (normalized [0,1] coordinates) pass through on a res x res grid.
+    // Half-pixel steps, so the result is at least 8-connected.
+    public static void Rasterize(IReadOnlyList<Segment> segments, bool[] wall, int res)
+    {
+        foreach (var seg in segments)
+        {
+            Vector2 a = seg.a * res;
+            Vector2 b = seg.b * res;
+            int steps = Mathf.Max(1, Mathf.CeilToInt(Vector2.Distance(a, b) / 0.5f));
+            for (int s = 0; s <= steps; s++)
+            {
+                Vector2 p = Vector2.Lerp(a, b, (float)s / steps);
+                int x = Mathf.Clamp((int)p.x, 0, res - 1);
+                int y = Mathf.Clamp((int)p.y, 0, res - 1);
+                wall[y * res + x] = true;
+            }
+        }
     }
 
     // 4-connected flood fill from a start index; returns the filled area (0 if the start is a wall or already visited)

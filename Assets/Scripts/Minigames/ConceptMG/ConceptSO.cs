@@ -19,12 +19,16 @@ public class ConceptSO : ScriptableObject
     [SerializeField, Min(0)]
     [Tooltip("Minimum number of closed regions the model must have before it can be submitted (needed by the painting station)")]
     private int     minClosedRegions;
+    [SerializeField, Min(0)]
+    [Tooltip("Minimum number of distinct palette colors the painting must use before it can be submitted")]
+    private int     minColors;
 
     public VectorImage  BaseSVG => baseSVG;
     public Sprite       Sketch => sketch;
     public Sprite       ConceptArt => conceptArt;
     public int          SegmentBudget => segmentBudget;
     public int          MinClosedRegions => minClosedRegions;
+    public int          MinColors => minColors;
 
 #if UNITY_EDITOR
     [Button("Compute budgets from SVG")]
