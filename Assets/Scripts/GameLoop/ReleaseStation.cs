@@ -1,7 +1,7 @@
 using UnityEngine;
 
 // The "launch button": a station that releases the finished skin when the player steps up to it.
-// Usable only while the player carries a painting; releasing hands over to GameLoop, which starts the next day.
+// Usable only while the player carries a painting; releasing hands over to LevelManager, which starts the next day.
 public class ReleaseStation : Minigame
 {
     [SerializeField, Min(0), Tooltip("Seconds the player has to stay at the station before the release fires (0 = immediate)")]
@@ -13,7 +13,7 @@ public class ReleaseStation : Minigame
     public override bool CanUse(Player player)
     {
         if (player == null) return false;
-        if ((GameLoop.instance != null) && (GameLoop.instance.state != GameLoop.State.Running)) return false;
+        if ((LevelManager.instance != null) && (LevelManager.instance.state != LevelManager.State.Production)) return false;
 
         return player.painting != null;
     }
@@ -44,7 +44,7 @@ public class ReleaseStation : Minigame
         active = false;
         heldFor = 0.0f;
 
-        if (GameLoop.instance != null) GameLoop.instance.Release();
-        else Debug.LogWarning("ReleaseStation: no GameLoop in the scene", this);
+        if (LevelManager.instance != null) LevelManager.instance.Release();
+        else Debug.LogWarning("ReleaseStation: no LevelManager in the scene", this);
     }
 }

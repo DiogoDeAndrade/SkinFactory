@@ -27,11 +27,15 @@ public partial class DropArea : MonoBehaviour
     private float           punchTime = 0.2f;
 
     public bool     IsTrash => trash;
+    public IdeaLibrarySO Library => ideaLibrary;
     public Idea     Current => current;
     public bool     HasIdea => current != null;
 
     [AutoStaticsCleanup]
     static List<DropArea>   areas = new List<DropArea>();
+
+    // Every enabled drop area in the scene
+    public static IReadOnlyList<DropArea> All => areas;
 
     ScreenSpaceOutline  outline;
     Idea                current;

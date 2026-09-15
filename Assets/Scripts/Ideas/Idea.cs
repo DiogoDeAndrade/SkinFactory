@@ -6,7 +6,8 @@ using UnityEngine;
 // An idea travelling out of the IdeaMachine: moves from a start to an end position over a set time, then waits
 // there. It never removes itself; whatever takes the idea destroys it, and the machine spawns the next one.
 // The machine calls Setup and Launch right after instantiating the prefab. The player highlights the nearest
-// idea in range (screen space outline) and can grab it, which parents it to the player's hold point.
+// idea in range (screen space outline plus a balloon with its name) and can grab it, which parents it to the
+// player's hold point.
 public partial class Idea : MonoBehaviour
 {
     [SerializeField, Tooltip("Set by the IdeaMachine on spawn; can be left empty on the prefab")]
@@ -17,6 +18,10 @@ public partial class Idea : MonoBehaviour
     private ScreenSpaceOutline  outline;
     [SerializeField] private Color highlightColor = new Color(1.0f, 0.85f, 0.2f, 1.0f);
     [SerializeField, Min(0)] private float highlightWidth = 3.0f;
+
+    [Header("Balloon")]
+    [SerializeField, Tooltip("Where the name balloon points at, relative to the idea (world axes)")]
+    private Vector3 balloonOffset = new Vector3(0.0f, 0.5f, 0.0f);
 
     public IdeaSO   IdeaSO => ideaSO;
     public bool     IsMoving => moving;
@@ -35,6 +40,7 @@ public partial class Idea : MonoBehaviour
     float   elapsed;
     bool    moving;
     bool    held;
+    SpeechBalloon balloon;   // Name balloon, up while highlighted
 
     void Awake()
     {
@@ -50,6 +56,7 @@ public partial class Idea : MonoBehaviour
     {
         ideas.Remove(this);
         if (outline != null) outline.enabled = false;
+        HideBalloon();
     }
 
     void OnDestroy()
@@ -112,9 +119,26 @@ public partial class Idea : MonoBehaviour
         moving = false;
     }
 
+    // Outline plus a balloon with the idea's name
     public void SetHighlight(bool on)
     {
         if ((outline != null) && (outline.enabled != on)) outline.enabled = on;
+
+        if (on) ShowBalloon();
+        else HideBalloon();
+    }
+
+    void ShowBalloon()
+    {
+        if ((balloon != null) || (ideaSO == null)) return;
+        balloon = SpeechBalloonManager.Show(ideaSO.DisplayName, transform, balloonOffset);
+    }
+
+    void HideBalloon()
+    {
+        if (balloon == null) return;
+        balloon.Hide();
+        balloon = null;
     }
 
     // Attaches the idea to a holder (e.g. the player's hold point), centered on it

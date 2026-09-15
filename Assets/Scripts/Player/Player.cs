@@ -217,6 +217,16 @@ public class Player : MonoBehaviour
         heldIdea = null;
     }
 
+    // Destroys the carried idea (new day)
+    public void DiscardIdea()
+    {
+        if (heldIdea == null) return;
+
+        Idea idea = heldIdea;
+        heldIdea = null;
+        Destroy(idea.gameObject);
+    }
+
     void EnableMinigame()
     {
         Minigame mg = Minigame.GetMinigame(this);

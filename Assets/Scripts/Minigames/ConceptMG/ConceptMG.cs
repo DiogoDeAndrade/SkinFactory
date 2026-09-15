@@ -510,7 +510,8 @@ public class ConceptMG : MinigameUI
     }
 
     // Not usable once submitted, or when the player already carries a drawing (e.g. a debug starting stage)
-    public override bool CanUse(Player player) => !drawDone && ((player == null) || (player.conceptDrawing == null));
+    // Unusable until the day's concept is known (LevelManager sets it once the pitch is done)
+    public override bool CanUse(Player player) => (concept != null) && !drawDone && ((player == null) || (player.conceptDrawing == null));
 
     public override void ResetStation() => Set(concept);
 }

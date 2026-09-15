@@ -8,6 +8,8 @@ using UnityEngine.UIElements;
 [CreateAssetMenu(fileName = "ConceptSO", menuName = "Skin Factory/ConceptSO")]
 public class ConceptSO : ScriptableObject
 {
+    [SerializeField, Tooltip("Name the boss uses when talking about this concept; the asset name if left empty")]
+    private string          displayName;
     [SerializeField] private VectorImage    baseSVG;
     [SerializeField] private Sprite         sketch;
     [SerializeField] private Sprite         conceptArt;
@@ -23,6 +25,7 @@ public class ConceptSO : ScriptableObject
     [Tooltip("Minimum number of distinct palette colors the painting must use before it can be submitted")]
     private int     minColors;
 
+    public string       DisplayName => string.IsNullOrEmpty(displayName) ? name : displayName;
     public VectorImage  BaseSVG => baseSVG;
     public Sprite       Sketch => sketch;
     public Sprite       ConceptArt => conceptArt;
