@@ -8,14 +8,18 @@ TBD
 
 ## Todo
 
-* Coding minigame
-* Marketing minigame
-* Boss demands (stretch goal): from a certain point on the boss roams the office; touching the player adds
-  demands to the skin (make it blue, only half the segments, ...)
-* Water system (we need water periodically)
-* Main game loop: test and wire the time limit and the launch in-game; success assessment
-* More skins (beyond the fox) - in progress
-* Launch button
+In order:
+
+1. Game over and launch: wire and test the time limit and the launch button in-game; success assessment
+2. Coding minigame
+3. Marketing minigame
+4. Water system (we need water periodically)
+5. Boss demands (stretch goal): from a certain point on the boss roams the office; touching the player adds
+   demands to the skin (make it blue, only half the segments, ...)
+
+Ongoing:
+
+* More skins (beyond the fox)
 * Improve explanation of regions
 
 ## Concept pipeline
