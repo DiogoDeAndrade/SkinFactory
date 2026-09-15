@@ -16,6 +16,9 @@ TBD
 * More skins (beyond the fox)
 * Launch button
 * Brainstorm minigame
+* Signposting next task
+* Add boss emotes
+* Improve explanation of regions
 
 ## Concept pipeline
 

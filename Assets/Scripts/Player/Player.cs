@@ -8,6 +8,9 @@ public class Player : MonoBehaviour
 
     static int workingID = Animator.StringToHash("Working");
 
+    // Station the player is currently working at (null when walking around)
+    public Minigame activeMinigame => currentMinigame;
+
     [Header("Skin")]
     [SerializeField, Tooltip("Where the voxel-extruded skin is built once a painting exists")]
     private VoxelSkin   skin;
