@@ -196,10 +196,10 @@ public class LevelManager : MonoBehaviour
         UpdateMachineHighlight();
     }
 
-    // The idea machines are outlined while the player is meant to be pitching
+    // The idea machines are outlined while the player is meant to be fetching an idea: brainstorm, hands empty
     void UpdateMachineHighlight()
     {
-        bool lit = (state == State.Brainstorm);
+        bool lit = (state == State.Brainstorm) && (player != null) && (player.heldIdea == null);
         if (lit == machinesLit) return;
         machinesLit = lit;
 

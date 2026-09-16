@@ -106,11 +106,12 @@ public class CodingMG : MinigameUI
         if (submitParticles != null) submitParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
     }
 
-    // Once per day; after an Escape the player has to walk off before it can be used again
+    // Once per day, during production only; after an Escape the player has to walk off before it can be used again
     public override bool CanUse(Player player)
     {
         if (codeDone || leaving) return false;
         if (player == null) return false;
+        if ((LevelManager.instance != null) && (LevelManager.instance.state != LevelManager.State.Production)) return false;
         return target.Length > 0;
     }
 

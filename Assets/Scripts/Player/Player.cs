@@ -52,6 +52,8 @@ public class Player : MonoBehaviour
     }
 
     [Header("Debug")]
+    [SerializeField, Tooltip("Use the debug starting stage below; off = a normal start, the fields are kept for later")]
+    private bool        debugMode = false;
     [SerializeField, Tooltip("Start already carrying this drawing (a PNG saved by the concept station), skipping that station")]
     private Texture2D   debugConceptDrawing;
     [SerializeField, Tooltip("Concept the debug drawing belongs to (used for the segment hint)")]
@@ -61,8 +63,8 @@ public class Player : MonoBehaviour
     [SerializeField, Tooltip("Start already carrying this painting (a PNG saved by the painting station), skipping all three stations. Needs the debug model above for the earlier data.")]
     private Texture2D   debugPainting;
 
-    // A debug starting stage is set up, so the first day should keep it instead of resetting the pipeline
-    public bool debugStageActive => (debugConceptDrawing != null) || (debugModel != null) || (debugPainting != null);
+    // A debug starting stage is on, so the first day should keep it instead of resetting the pipeline
+    public bool debugStageActive => debugMode && ((debugConceptDrawing != null) || (debugModel != null) || (debugPainting != null));
 
     // Drawing produced in the concept art station (owned by the player, destroyed on replace)
     public Texture2D    conceptDrawing { get; private set; }
@@ -157,6 +159,8 @@ public class Player : MonoBehaviour
         if (interactInput != null) interactInput.playerInput = playerInput;
         if (holdPoint == null) holdPoint = transform;
 
+        if (!debugMode) return;
+
         if (debugConceptDrawing != null)
         {
             SetConceptDrawing(TextureUtils.ReadableCopy(debugConceptDrawing, "Debug concept drawing"), debugConceptSource);
@@ -202,9 +206,8 @@ public class Player : MonoBehaviour
             if (nearbyIdea != null) nearbyIdea.SetHighlight(true);
         }
 
-        // Only an area the carried idea can actually be dropped into lights up
-        DropArea area = (heldIdea != null) ? DropArea.GetAt(transform.position) : null;
-        if ((area != null) && !area.Accepts(heldIdea)) area = null;
+        // Only an area the carried idea can actually be dropped into counts (and lights up)
+        DropArea area = (heldIdea != null) ? DropArea.GetAt(transform.position, heldIdea) : null;
 
         if (nearbyDropArea != area)
         {

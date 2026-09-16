@@ -96,10 +96,11 @@ public class MarketingMG : MinigameUI
         UpdateUI();
     }
 
-    // Once per day
+    // Once per day, during production only
     public override bool CanUse(Player player)
     {
         if (marketingDone || (player == null)) return false;
+        if ((LevelManager.instance != null) && (LevelManager.instance.state != LevelManager.State.Production)) return false;
         return (postPrefab != null) && (playArea != null) && (positivePosts.Count > 0) && (negativePosts.Count > 0);
     }
 

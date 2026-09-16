@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 61f1db99f2f934f47a88ed0025dd2314, type: 3}
-  m_Name: Fox
+  m_Name: Robot
   m_EditorClassIdentifier: Assembly-CSharp::ConceptSO
-  displayName: 
-  baseSVG: {fileID: 7388822144124034973, guid: 6fbacacba583b7b428b05415b95896b1, type: 3}
-  sketch: {fileID: 3286163911610860551, guid: 5a7f952deff19da4caa8efdd83bfc6ac, type: 3}
-  conceptArt: {fileID: 21300000, guid: e55d5cec9d9da6f4188976e4e3974ba9, type: 3}
-  segmentBudget: 40
-  minClosedRegions: 5
-  minColors: 3
+  displayName: Robot
+  baseSVG: {fileID: 7388822144124034973, guid: 4ebb87d5b346439ab46d5e68011567b3, type: 3}
+  sketch: {fileID: 3286163911610860551, guid: c1d000d15f9e4a32be599cfc2c4bb794, type: 3}
+  conceptArt: {fileID: 21300000, guid: 0a80b2d91f2c590458d5c43ea21111ce, type: 3}
+  segmentBudget: 45
+  minClosedRegions: 8
+  minColors: 4

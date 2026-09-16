@@ -7499,7 +7499,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UC.ScreenSpaceOutline
   color: {r: 0.8396226, g: 0.25743148, b: 0.25743148, a: 1}
-  width: 3
+  width: 2
   occlusion: 0
   targetRenderers: []
   excludeLayers:
@@ -11658,8 +11658,18 @@ MonoBehaviour:
   ideaNeedsAllTags: 0
   maxAttempts: 3
   concepts:
+  - {fileID: 11400000, guid: 56e5d5f851844d1eb008b08c20b0b54a, type: 2}
+  - {fileID: 11400000, guid: 0ab565538251414b8ef997a8fb7605ed, type: 2}
+  - {fileID: 11400000, guid: 5d284958b0454108bbff89a90076a347, type: 2}
   - {fileID: 11400000, guid: c3f5a1230dd98ab49b87bfbba206e0e5, type: 2}
   - {fileID: 11400000, guid: 3b7528ef645bf75439add2ed2df3b854, type: 2}
+  - {fileID: 11400000, guid: 065805c588ae4b6f85a9fee0644be377, type: 2}
+  - {fileID: 11400000, guid: ae269dea01314a719ef655e8c011d302, type: 2}
+  - {fileID: 11400000, guid: 48fd52596a044ac4b54703b57b8f6f69, type: 2}
+  - {fileID: 11400000, guid: 76b9bc921bb14732be4882998d2c2359, type: 2}
+  - {fileID: 11400000, guid: c76a112687b74dbabdc5637d81ab4ddf, type: 2}
+  - {fileID: 11400000, guid: 3e44da99f7904ed994b2b1add6b91828, type: 2}
+  - {fileID: 11400000, guid: dac9976152cc45a6b9781fc8214fa909, type: 2}
   conceptStation: {fileID: 703124322}
   dayDuration: 300
   baseProfitTarget: 10000
@@ -13562,7 +13572,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UC.ScreenSpaceOutline
   color: {r: 0.50800383, g: 0.96078426, b: 0.38431367, a: 1}
-  width: 3
+  width: 2
   occlusion: 0
   targetRenderers: []
   excludeLayers:
@@ -14371,7 +14381,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UC.ScreenSpaceOutline
   color: {r: 0.96078426, g: 0.39560336, b: 0.38431367, a: 1}
-  width: 3
+  width: 2
   occlusion: 0
   targetRenderers: []
   excludeLayers:
@@ -18055,7 +18065,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UC.ScreenSpaceOutline
   color: {r: 0.38581344, g: 0.86013836, b: 0.9622641, a: 1}
-  width: 3
+  width: 2
   occlusion: 0
   targetRenderers: []
   excludeLayers:
@@ -18717,6 +18727,7 @@ MonoBehaviour:
     keyNegative: 276
     inputAction: Interact
   holdPoint: {fileID: 1567241330}
+  debugMode: 0
   debugConceptDrawing: {fileID: 2800000, guid: 081e6cb61dbafd149879e90f75d56feb, type: 3}
   debugConceptSource: {fileID: 11400000, guid: 3b7528ef645bf75439add2ed2df3b854, type: 2}
   debugModel: {fileID: 11400000, guid: 52dab16860f64554088de533eff7f1d9, type: 2}
@@ -70945,6 +70956,7 @@ GameObject:
   - component: {fileID: 3129847773451026487}
   - component: {fileID: 8721092851587784176}
   - component: {fileID: 8721092851587784177}
+  - component: {fileID: 8721092851587784178}
   m_Layer: 0
   m_Name: Object_994
   m_TagString: Untagged
@@ -101462,6 +101474,24 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 2.8590467, y: 0.83, z: 1.5674319}
   m_Center: {x: 0, y: -0.04, z: -0.00000011920929}
+--- !u!114 &8721092851587784178
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5194126730728148846}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5b9a0e1c2d3e4f5061728394a5b6c7d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PitchTableOutline
+  renderers: []
+  outline: {fileID: 0}
+  color: {r: 0.50800383, g: 0.96078426, b: 0.38431367, a: 1}
+  width: 2
+  onlyWhenAccepted: 1
+  nearRange: 4
 --- !u!4 &8721984299181323583
 Transform:
   m_ObjectHideFlags: 0

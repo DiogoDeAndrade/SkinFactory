@@ -59,8 +59,9 @@ public partial class DropArea : MonoBehaviour
         baseScale = transform.localScale;
     }
 
-    // Area whose radius (XZ) contains the position; the closest one if several overlap
-    public static DropArea GetAt(Vector3 position)
+    // Area whose radius (XZ) contains the position; the closest one if several overlap. With an idea given, only
+    // areas that accept it count, so overlapping areas on one table each answer for their own kind of idea.
+    public static DropArea GetAt(Vector3 position, Idea idea = null)
     {
         DropArea    best = null;
         float       bestDist = float.MaxValue;
@@ -68,6 +69,7 @@ public partial class DropArea : MonoBehaviour
         foreach (var area in areas)
         {
             if (area == null) continue;
+            if ((idea != null) && !area.Accepts(idea)) continue;
 
             float d = Vector3.Distance(area.transform.position.x0z(), position.x0z());
             if ((d < area.radius) && (d < bestDist))
