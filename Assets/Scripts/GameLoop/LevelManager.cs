@@ -88,7 +88,7 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI    dayText;        // Optional, "Day N"
     [SerializeField] private TextMeshProUGUI    requestText;    // Optional, what the boss asked for today
     [SerializeField] private LaunchResults      launchResults;  // Results screen after a release; skipped if empty
-    [SerializeField, Min(0), Tooltip("Stars for categories without a score yet (coding, marketing; every missing station in a debug start)")]
+    [SerializeField, Min(0), Tooltip("Stars for categories without a score yet (marketing; every missing station in a debug start)")]
     private int                                 placeholderStars = 3;
     [SerializeField] private CanvasGroup        gameOverPanel;  // Shown on game over; wire its Retry button to Retry()
     [SerializeField] private TextMeshProUGUI    gameOverText;   // Optional, reason
@@ -379,8 +379,8 @@ public class LevelManager : MonoBehaviour
             new LaunchResults.Category("Concept",   Stars((player != null) ? player.conceptScore : -1.0f)),
             new LaunchResults.Category("Modelling", Stars((player != null) ? player.modelScore : -1.0f)),
             new LaunchResults.Category("Texturing", Stars((player != null) ? player.paintingScore : -1.0f)),
-            new LaunchResults.Category("Coding",    placeholderStars),
-            new LaunchResults.Category("Marketing", placeholderStars),
+            new LaunchResults.Category("Coding",    Stars((player != null) ? player.codingAccuracy : -1.0f)),
+            new LaunchResults.Category("Marketing", placeholderStars),    // No marketing minigame yet
         };
     }
 
