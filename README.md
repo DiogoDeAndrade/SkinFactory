@@ -10,19 +10,21 @@ TBD
 
 In order:
 
-1. Game over and launch: wire and test the time limit and the launch button in-game; success assessment
-2. Coding minigame
-3. Marketing minigame
-4. Water system (we need water periodically)
-5. Boss demands (stretch goal): from a certain point on the boss roams the office; touching the player adds
+1. Marketing minigame (launch results use 3 stars for it until then)
+2. Water system (we need water periodically)
+3. Boss demands (stretch goal): from a certain point on the boss roams the office; touching the player adds
    demands to the skin (make it blue, only half the segments, ...)
-6. Main menu + credits screen
+4. Main menu + credits screen
 
 Ongoing:
 
 * More skins (beyond the fox)
 * Improve explanation of regions
 * Assist: show an idea's categories (tags) on its balloon, not just the name
+* Real texturing score (currently half regions painted, half colors used vs. the concept minimum)
+
+Done: boss briefing and pitch verdicts, brainstorm scoring, coding minigame, release console, launch results
+with profit, game over, day transition.
 
 ## Concept pipeline
 
