@@ -114,6 +114,8 @@ public class LevelManager : MonoBehaviour
     public bool timerRunning => ((state == State.Brainstorm) || (state == State.Production)) && !transitioning;
 
     Player          player;
+    IdeaMachine[]   machines = new IdeaMachine[0];   // Outlined during the brainstorm
+    bool            machinesLit;
     List<string>    requested = new List<string>();
     List<DropArea>  areas = new List<DropArea>();
     Coroutine       flowCR;
@@ -140,6 +142,7 @@ public class LevelManager : MonoBehaviour
     void Start()
     {
         player = FindAnyObjectByType<Player>();
+        machines = FindObjectsByType<IdeaMachine>();
         if (conceptStation == null) conceptStation = FindAnyObjectByType<ConceptMG>();
         if (bossAnchor == null) bossAnchor = transform;
 
@@ -173,6 +176,20 @@ public class LevelManager : MonoBehaviour
 
         if (state == State.Brainstorm) CheckPitch();
         UpdateReminder();
+        UpdateMachineHighlight();
+    }
+
+    // The idea machines are outlined while the player is meant to be pitching
+    void UpdateMachineHighlight()
+    {
+        bool lit = (state == State.Brainstorm);
+        if (lit == machinesLit) return;
+        machinesLit = lit;
+
+        foreach (var machine in machines)
+        {
+            if (machine != null) machine.SetHighlight(lit);
+        }
     }
 
     #region Day flow
@@ -257,9 +274,11 @@ public class LevelManager : MonoBehaviour
         // The boss reads the pitch back (a beat of thinking), then judges it in the same breath
         string think = PitchText();
 
-        if (CountMatchingIdeas() >= minMatchingIdeas)
+        int matching = CountMatchingIdeas();
+        if (matching >= minMatchingIdeas)
         {
             ConceptSO concept = PickConcept();
+            if (player != null) player.SetBrainstormStars(BrainstormStars(matching));
             onPitchAccepted?.Invoke();
             yield return BossSaysCR(think, string.Format(pivotLine, ConceptName(concept)));
             StartProduction(concept);
@@ -271,7 +290,9 @@ public class LevelManager : MonoBehaviour
 
             if (attempts >= maxAttempts)
             {
+                // The pitch never landed: one star
                 ConceptSO concept = PickConcept();
+                if (player != null) player.SetBrainstormStars(1);
                 yield return BossSaysCR(think, string.Format(giveUpLine, ConceptName(concept)));
                 StartProduction(concept);
             }
@@ -349,8 +370,12 @@ public class LevelManager : MonoBehaviour
         bool debug = (player != null) && player.debugStageActive;
         int Stars(float score) => (score >= 0.0f) ? LaunchResults.StarsFor(score) : (debug ? placeholderStars : 0);
 
+        int brainstorm = (player != null) ? player.brainstormStars : -1;
+        if (brainstorm < 0) brainstorm = debug ? placeholderStars : 0;
+
         return new List<LaunchResults.Category>
         {
+            new LaunchResults.Category("Brainstorm", brainstorm),
             new LaunchResults.Category("Concept",   Stars((player != null) ? player.conceptScore : -1.0f)),
             new LaunchResults.Category("Modelling", Stars((player != null) ? player.modelScore : -1.0f)),
             new LaunchResults.Category("Texturing", Stars((player != null) ? player.paintingScore : -1.0f)),
@@ -587,6 +612,35 @@ public class LevelManager : MonoBehaviour
         {
             if ((area != null) && !area.IsTrash) areas.Add(area);
         }
+    }
+
+    // Stars for an accepted pitch: 5, minus one per earlier rejection, minus one when not every idea matched,
+    // minus one when a requested tag was left uncovered (three cute ideas for "Cute and Scary"). Never below 1.
+    int BrainstormStars(int matching)
+    {
+        int stars = 5 - attempts;
+        if (matching < areas.Count) stars--;
+        if (!AllRequestedTagsCovered()) stars--;
+        return Mathf.Clamp(stars, 1, 5);
+    }
+
+    bool AllRequestedTagsCovered()
+    {
+        foreach (var tag in requested)
+        {
+            bool covered = false;
+            foreach (var area in areas)
+            {
+                IdeaSO idea = ((area != null) && (area.Current != null)) ? area.Current.IdeaSO : null;
+                if ((idea != null) && idea.HasTag(tag))
+                {
+                    covered = true;
+                    break;
+                }
+            }
+            if (!covered) return false;
+        }
+        return true;
     }
 
     int CountMatchingIdeas()

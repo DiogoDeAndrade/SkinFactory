@@ -1,0 +1,2 @@
+visible = !visible;
+renderer.enabled = visible;

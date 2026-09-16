@@ -1,0 +1,2 @@
+health -= damage;
+if (health <= 0) Die();

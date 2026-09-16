@@ -1,0 +1,5 @@
+void Respawn()
+{
+    transform.position = spawnPoint.position;
+    health = maxHealth;
+}

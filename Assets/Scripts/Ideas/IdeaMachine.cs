@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UC;
 using UnityEngine;
 
 // Spawns one Idea prefab at a time and sends it from the start to the end position, where it waits. Ideas are
@@ -26,6 +27,12 @@ public class IdeaMachine : MonoBehaviour
     [SerializeField, Tooltip("Spawn the first idea on Start")]
     private bool            spawnOnStart = true;
 
+    [Header("Highlight")]
+    [SerializeField, Tooltip("Outline lit while the player should be using the machine (brainstorm); created on this object if left empty")]
+    private ScreenSpaceOutline  outline;
+    [SerializeField] private Color highlightColor = new Color(1.0f, 0.85f, 0.2f, 1.0f);
+    [SerializeField, Min(0)] private float highlightWidth = 3.0f;
+
     public Idea             CurrentIdea => current;
 
     Idea            current;
@@ -34,8 +41,28 @@ public class IdeaMachine : MonoBehaviour
 
     void Start()
     {
+        if (outline == null) outline = GetComponentInChildren<ScreenSpaceOutline>();
+        if (outline == null)
+        {
+            outline = gameObject.AddComponent<ScreenSpaceOutline>();
+            outline.outlineColor = highlightColor;
+            outline.outlineWidth = highlightWidth;
+            outline.Refresh();
+        }
+        outline.enabled = false;
+
         if (spawnOnStart) Spawn();
         else delayLeft = spawnDelay;
+    }
+
+    void OnDisable()
+    {
+        if (outline != null) outline.enabled = false;
+    }
+
+    public void SetHighlight(bool on)
+    {
+        if ((outline != null) && (outline.enabled != on)) outline.enabled = on;
     }
 
     void Update()

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// The release console: with the player standing at it (production, painting in hand), holding the interact key
+// The release console: with the player standing at it (production, painting done and code written), holding the interact key
 // pulls the lever; letting go lets it fall back. Once the lever reaches the on position the skin is released and
 // LevelManager starts the next day. The lever transform is rotated from its rest pose to onRotation as progress.
 public class ReleaseStation : Minigame
@@ -30,7 +30,8 @@ public class ReleaseStation : Minigame
         if (player == null) return false;
         if ((LevelManager.instance != null) && (LevelManager.instance.state != LevelManager.State.Production)) return false;
 
-        return player.painting != null;
+        // A painting and the code: the skin is complete
+        return (player.painting != null) && player.hasCode;
     }
 
     void Start()

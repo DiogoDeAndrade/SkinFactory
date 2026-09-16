@@ -1,0 +1,2 @@
+cooldown -= Time.deltaTime;
+if (cooldown <= 0) Fire();

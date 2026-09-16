@@ -77,12 +77,14 @@ public class Player : MonoBehaviour
     }
 
     // Station scores in [0,1] for the launch results, -1 while that station has not been done this day
+    public int          brainstormStars { get; private set; } = -1;    // Already in stars (1-5), set when the pitch lands
     public float        conceptScore { get; private set; } = -1.0f;
     public float        modelScore { get; private set; } = -1.0f;
     public float        paintingScore { get; private set; } = -1.0f;
     public float        codingAccuracy { get; private set; } = -1.0f;   // Right characters over the snippet length
     public bool         hasCode => codingAccuracy >= 0.0f;
 
+    public void SetBrainstormStars(int stars) { brainstormStars = Mathf.Clamp(stars, 0, 5); }
     public void SetConceptScore(float score) { conceptScore = Mathf.Clamp01(score); }
     public void SetModelScore(float score) { modelScore = Mathf.Clamp01(score); }
     public void SetPaintingScore(float score) { paintingScore = Mathf.Clamp01(score); }
@@ -127,6 +129,7 @@ public class Player : MonoBehaviour
         modelPolygons = null;
         if (painting != null) Destroy(painting);
         painting = null;
+        brainstormStars = -1;
         conceptScore = -1.0f;
         modelScore = -1.0f;
         paintingScore = -1.0f;

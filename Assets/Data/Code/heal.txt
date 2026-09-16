@@ -1,0 +1,1 @@
+health = Mathf.Min(health + amount, maxHealth);

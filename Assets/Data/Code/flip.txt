@@ -1,0 +1,1 @@
+sprite.flipX = velocity.x < 0;

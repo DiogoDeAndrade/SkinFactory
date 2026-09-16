@@ -1,0 +1,1 @@
+Color c = palette[Random.Range(0, palette.Length)];

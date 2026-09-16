@@ -1,0 +1,2 @@
+float d = Vector3.Distance(a, b);
+return d < range;

@@ -26,6 +26,8 @@ public class CodingMG : MinigameUI
     [SerializeField] private TextMeshProUGUI    codeText;       // The snippet, colored as the player types (rich text on, no wrap)
     [SerializeField] private TextMeshProUGUI    accuracyText;   // Optional, accuracy and progress
     [SerializeField] private Button             submitButton;   // Optional, interactable once the snippet is fully typed
+    [SerializeField, Tooltip("Played when the snippet is submitted (the rising code characters); optional")]
+    private ParticleSystem                      submitParticles;
 
     [Header("Colors")]
     [SerializeField] private Color  pendingColor = new Color(0.55f, 0.6f, 0.65f, 1.0f);
@@ -78,6 +80,7 @@ public class CodingMG : MinigameUI
 
         PickSnippet();
         UpdateUI();
+        StopParticles();
     }
 
     void OnDisable()
@@ -94,6 +97,13 @@ public class CodingMG : MinigameUI
         correctCount = 0;
         PickSnippet();
         UpdateUI();
+        StopParticles();
+    }
+
+    // Nothing left over from the editor preview or the previous day
+    void StopParticles()
+    {
+        if (submitParticles != null) submitParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
     }
 
     // Once per day; after an Escape the player has to walk off before it can be used again
@@ -262,6 +272,8 @@ public class CodingMG : MinigameUI
         if (player == null) player = FindAnyObjectByType<Player>();
         if (player != null) player.SetCodingAccuracy(result);
         else Debug.LogWarning("CodingMG: no Player found to store the coding result", this);
+
+        if (submitParticles != null) submitParticles.Play(true);
 
         UpdateUI();
         canvasGroup.FadeOut(0.1f);

@@ -1,0 +1,5 @@
+int count = 0;
+foreach (var skin in skins)
+{
+    if (skin.unlocked) count++;
+}
