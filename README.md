@@ -20,7 +20,6 @@ Ongoing:
 
 * Improve explanation of regions
 * Assist: show an idea's categories (tags) on its balloon, not just the name
-* Real texturing score (currently half regions painted, half colors used vs. the concept minimum)
 
 Done: boss briefing and pitch verdicts, brainstorm scoring, coding minigame, marketing minigame (optional,
 1 star if skipped), release console, launch results with profit, game over, day transition, twelve concepts.

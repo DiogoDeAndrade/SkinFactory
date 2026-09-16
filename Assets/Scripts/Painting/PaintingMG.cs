@@ -92,18 +92,25 @@ public class PaintingMG : MinigameUI
         }
     }
 
-    // Placeholder score until painting gets a real one: half for the regions painted, half for using at least
-    // the concept's minimum number of colors
-    public float score
+    // Baseline of 3 stars, one more for using more colors than the concept asks for, one more for painting more
+    // regions than the concept's minimum. Returned in [0,1] (stars / 5) like the other station scores.
+    public int stars
     {
         get
         {
-            if ((regionPaint == null) || (interiorRegionCount == 0)) return 0.0f;
-            float regions = paintedRegionCount / (float)interiorRegionCount;
-            float colors = (minColors > 0) ? Mathf.Clamp01(colorsUsed / (float)minColors) : 1.0f;
-            return 0.5f * regions + 0.5f * colors;
+            if ((regionPaint == null) || (interiorRegionCount == 0)) return 0;
+
+            var concept = (player != null) ? player.conceptDrawingSource : null;
+            int minRegions = (concept != null) ? concept.MinClosedRegions : 0;
+
+            int result = 3;
+            if (colorsUsed > minColors) result++;
+            if (paintedRegionCount > minRegions) result++;
+            return result;
         }
     }
+
+    public float score => stars / 5.0f;
 
     public bool canSubmit
     {
