@@ -92,6 +92,19 @@ public class PaintingMG : MinigameUI
         }
     }
 
+    // Placeholder score until painting gets a real one: half for the regions painted, half for using at least
+    // the concept's minimum number of colors
+    public float score
+    {
+        get
+        {
+            if ((regionPaint == null) || (interiorRegionCount == 0)) return 0.0f;
+            float regions = paintedRegionCount / (float)interiorRegionCount;
+            float colors = (minColors > 0) ? Mathf.Clamp01(colorsUsed / (float)minColors) : 1.0f;
+            return 0.5f * regions + 0.5f * colors;
+        }
+    }
+
     public bool canSubmit
     {
         get
@@ -160,6 +173,7 @@ public class PaintingMG : MinigameUI
         if (player != null)
         {
             var painting = CreateExportTexture();
+            player.SetPaintingScore(score);
             player.SetPainting(painting);
 #if UNITY_EDITOR
             if (savePaintingOnSubmit) SavePaintingPNG(painting);

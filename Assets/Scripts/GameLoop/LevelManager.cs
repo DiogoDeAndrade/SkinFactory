@@ -13,11 +13,13 @@ using UnityEngine.SceneManagement;
 //  2. Brainstorm: the timer runs; the player fills the pitch drop areas with ideas. Once all are full the boss
 //     judges the pitch (minMatchingIdeas of them must carry a requested tag). A rejected pitch has to be taken
 //     apart before it can be pitched again; after maxAttempts rejections the boss picks the concept himself
-//  3. Production: concept, modelling, painting, release (next day). Timer out = game over
+//  3. Production: concept, modelling, painting, release
+//  4. Launch: the results screen scores each station in stars and turns them into profit; enough profit starts
+//     the next day, too little is game over. Timer out at any point = game over
 // The timer only runs while the player is working (brainstorm and production), never while the boss talks.
 public class LevelManager : MonoBehaviour
 {
-    public enum State { Briefing, Brainstorm, Verdict, Production, GameOver }
+    public enum State { Briefing, Brainstorm, Verdict, Production, Launch, GameOver }
 
     [Header("Boss")]
     [SerializeField, Tooltip("Camera framing the boss; its GameObject is switched on while he talks and off otherwise")]
@@ -32,8 +34,15 @@ public class LevelManager : MonoBehaviour
     private float               fallbackTalkTime = 3.0f;
     [SerializeField, Min(0), Tooltip("Seconds between two lines said in a row (the thinking beat before a verdict)")]
     private float               lineGap = 0.6f;
+
     [SerializeField, Min(0), Tooltip("Distance (XZ) from the boss anchor within which the boss repeats the request during the brainstorm")]
     private float               bossTalkRange = 2.5f;
+
+    [Header("Day transition")]
+    [SerializeField, Min(0), Tooltip("Fullscreen wipe out / in around a day change (needs a FullscreenWiper in the scene)")]
+    private float               dayWipeTime = 0.5f;
+    [SerializeField]
+    private WipeType            dayWipeType = WipeType.Random;
 
     [Header("Boss lines")]
     [SerializeField, Tooltip("{0} = the requested tags, e.g. \"Cute and Scary\"")]
@@ -46,6 +55,8 @@ public class LevelManager : MonoBehaviour
     private string              giveUpLine = "All your ideas are rubbish. Let's do {0}!";
     [SerializeField, Tooltip("{0} = the concept the boss picks")]
     private string              pivotLine = "Let's pivot from that, we'll do {0} instead!";
+    [SerializeField, TextArea, Tooltip("Said on game over, before the panel comes up")]
+    private string              firedLine = "You're fired!\nWe have no place for slackers!";
 
     [Header("Pitch")]
     [SerializeField, Tooltip("Tags the boss can ask for, one per line; the union of the pitch areas' libraries if left empty")]
@@ -69,11 +80,16 @@ public class LevelManager : MonoBehaviour
 
     [Header("Day")]
     [SerializeField, Min(1)] private float dayDuration = 300.0f;    // Seconds
+    [SerializeField, Tooltip("Where the player starts each day; left where they are if empty")]
+    private Transform           playerSpawn;
 
     [Header("UI references")]
     [SerializeField] private TextMeshProUGUI    timerText;      // Optional, "mm:ss"
     [SerializeField] private TextMeshProUGUI    dayText;        // Optional, "Day N"
     [SerializeField] private TextMeshProUGUI    requestText;    // Optional, what the boss asked for today
+    [SerializeField] private LaunchResults      launchResults;  // Results screen after a release; skipped if empty
+    [SerializeField, Min(0), Tooltip("Stars for categories without a score yet (coding, marketing; every missing station in a debug start)")]
+    private int                                 placeholderStars = 3;
     [SerializeField] private CanvasGroup        gameOverPanel;  // Shown on game over; wire its Retry button to Retry()
     [SerializeField] private TextMeshProUGUI    gameOverText;   // Optional, reason
 
@@ -94,13 +110,14 @@ public class LevelManager : MonoBehaviour
     public ConceptSO                currentConcept { get; private set; }
     public IReadOnlyList<string>    requestedTags => requested;
 
-    // The timer only runs while the player is working, not while the boss talks
-    public bool timerRunning => (state == State.Brainstorm) || (state == State.Production);
+    // The timer only runs while the player is working, not while the boss talks or the day changes
+    public bool timerRunning => ((state == State.Brainstorm) || (state == State.Production)) && !transitioning;
 
     Player          player;
     List<string>    requested = new List<string>();
     List<DropArea>  areas = new List<DropArea>();
     Coroutine       flowCR;
+    bool            transitioning;      // Wiping between days
     SpeechBalloon   reminderBalloon;    // Request repeated over the boss while the player stands next to him
     bool            pitchDirty;     // Something changed since the last verdict, so a full pitch gets judged again
     int             lastConceptIndex = -1;
@@ -172,10 +189,16 @@ public class LevelManager : MonoBehaviour
         pitchDirty = true;
         Time.timeScale = 1.0f;
 
-        // Fresh pipeline: nothing carried, every station back to its initial state, no concept until the boss picks one
+        // Fresh pipeline: nothing carried, every station back to its initial state, no concept until the boss picks one.
+        // A debug starting stage on the player (day one only) is kept, and the day jumps straight to production.
         if (player == null) player = FindAnyObjectByType<Player>();
-        player?.ResetPipeline();
-        player?.DiscardIdea();
+        bool debugStart = (day == 1) && (player != null) && player.debugStageActive;
+        if ((player != null) && (playerSpawn != null)) player.Teleport(playerSpawn);
+        if (!debugStart)
+        {
+            player?.ResetPipeline();
+            player?.DiscardIdea();
+        }
         var stations = FindObjectsByType<MinigameUI>();
         foreach (var station in stations)
         {
@@ -189,6 +212,13 @@ public class LevelManager : MonoBehaviour
         if (dayText) dayText.text = $"Day {day}";
         UpdateTimerText();
         onDayStarted?.Invoke(day);
+
+        if (debugStart)
+        {
+            ConceptSO concept = (player.conceptDrawingSource != null) ? player.conceptDrawingSource : PickConcept();
+            StartProduction(concept);
+            return;
+        }
 
         flowCR = StartCoroutine(BriefingCR());
     }
@@ -284,9 +314,88 @@ public class LevelManager : MonoBehaviour
         }
 
         onReleased?.Invoke();
-        StartDay();
+
+        if (launchResults == null)
+        {
+            NextDay();
+            return;
+        }
+
+        // Clock stopped, controls off, results up; the screen reports back once it has been read
+        state = State.Launch;
+        HideReminder();
+        if (player != null) player.LockControls(true);
+        launchResults.Show(BuildLaunchCategories(), OnLaunchDone);
     }
 
+    void OnLaunchDone(bool success, int profit)
+    {
+        if (state != State.Launch) return;
+
+        if (success)
+        {
+            NextDay();
+        }
+        else
+        {
+            launchResults.Hide(dayWipeTime);
+            GameOver($"Not enough profit (${profit:N0})");
+        }
+    }
+
+    // Stars per category from the day's station scores; placeholders where there is no score yet
+    List<LaunchResults.Category> BuildLaunchCategories()
+    {
+        bool debug = (player != null) && player.debugStageActive;
+        int Stars(float score) => (score >= 0.0f) ? LaunchResults.StarsFor(score) : (debug ? placeholderStars : 0);
+
+        return new List<LaunchResults.Category>
+        {
+            new LaunchResults.Category("Concept",   Stars((player != null) ? player.conceptScore : -1.0f)),
+            new LaunchResults.Category("Modelling", Stars((player != null) ? player.modelScore : -1.0f)),
+            new LaunchResults.Category("Texturing", Stars((player != null) ? player.paintingScore : -1.0f)),
+            new LaunchResults.Category("Coding",    placeholderStars),
+            new LaunchResults.Category("Marketing", placeholderStars),
+        };
+    }
+
+    // Next day behind a wipe when there is a wiper, straight away otherwise
+    void NextDay()
+    {
+        if (FullscreenWiper.hasWiper && (dayWipeTime > 0.0f))
+        {
+            StartCoroutine(DayTransitionCR());
+        }
+        else
+        {
+            if (launchResults != null) launchResults.Hide(0.0f);
+            StartDay();
+            if (player != null) player.LockControls(false);
+        }
+    }
+
+    // Wipe out, new day under the cover, wipe back in. Runs outside flowCR: StartDay stops that one.
+    IEnumerator DayTransitionCR()
+    {
+        transitioning = true;
+        if (player != null) player.LockControls(true);
+
+        bool covered = false;
+        FullscreenWiper.WipeOut(dayWipeTime, dayWipeType, () => covered = true);
+        while (!covered) yield return null;
+
+        if (launchResults != null) launchResults.Hide(0.0f);
+        StartDay();
+        transitioning = false;
+
+        bool revealed = false;
+        FullscreenWiper.WipeIn(dayWipeTime, dayWipeType, () => revealed = true);
+        while (!revealed) yield return null;
+
+        if (player != null) player.LockControls(false);
+    }
+
+    // Timer stops, the boss fires the player on camera, then the panel comes up and time freezes
     public void GameOver(string reason)
     {
         if (state == State.GameOver) return;
@@ -294,11 +403,22 @@ public class LevelManager : MonoBehaviour
         if (flowCR != null) StopCoroutine(flowCR);
         flowCR = null;
         HideReminder();
-        SetBossCamera(false);
 
         state = State.GameOver;
         timeLeft = 0.0f;
         UpdateTimerText();
+        onGameOver?.Invoke(reason);
+
+        flowCR = StartCoroutine(GameOverCR(reason));
+    }
+
+    IEnumerator GameOverCR(string reason)
+    {
+        if (player != null) player.LockControls(true);
+
+        // The camera stays on the boss behind the panel
+        yield return BossSpeechCR(false, firedLine);
+
         Time.timeScale = 0.0f;
 
         if (gameOverText) gameOverText.text = reason;
@@ -308,8 +428,7 @@ public class LevelManager : MonoBehaviour
             gameOverPanel.interactable = true;
             gameOverPanel.blocksRaycasts = true;
         }
-
-        onGameOver?.Invoke(reason);
+        flowCR = null;
     }
 
     // Wire the game over panel's Retry button here
@@ -350,7 +469,10 @@ public class LevelManager : MonoBehaviour
     string RequestText() => string.Format(requestLine, JoinTags(requested));
 
     // Camera on, each line up for its reading time (a gap between them), camera off. Empty lines are skipped.
-    IEnumerator BossSaysCR(params string[] lines)
+    IEnumerator BossSaysCR(params string[] lines) => BossSpeechCR(true, lines);
+
+    // Same, with the choice of leaving the camera on the boss afterwards
+    IEnumerator BossSpeechCR(bool cameraOffAfter, params string[] lines)
     {
         HideReminder();
         SetBossCamera(true);
@@ -370,7 +492,7 @@ public class LevelManager : MonoBehaviour
         }
 
         yield return new WaitForSeconds(bossPause);
-        SetBossCamera(false);
+        if (cameraOffAfter) SetBossCamera(false);
     }
 
     // The pitch read back as one line: {0}, {1}... by pitch area order, {nouns}, {styles}... by the area's library name

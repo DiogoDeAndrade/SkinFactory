@@ -1,0 +1,8 @@
+public void ApplySkin(Skin skin)
+{
+    for (int i = 0; i < parts.Length; i++)
+    {
+        parts[i].SetColor(skin.colors[i]);
+    }
+    onSkinApplied?.Invoke(skin);
+}

@@ -156,6 +156,7 @@ public class ModellingMG : MinigameUI
             var model = new Vector2[polygons.Count][];
             for (int i = 0; i < polygons.Count; i++) model[i] = polygons[i].ToArray();
             player.SetModel(model);
+            player.SetModelScore(lastScore);
 #if UNITY_EDITOR
             if (saveModelOnSubmit) SaveModelAsset(model);
 #endif

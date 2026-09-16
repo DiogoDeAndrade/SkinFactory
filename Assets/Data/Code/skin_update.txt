@@ -1,0 +1,9 @@
+void Update()
+{
+    if (health <= 0)
+    {
+        Die();
+        return;
+    }
+    skin.Refresh(colors);
+}

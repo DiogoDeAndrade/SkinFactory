@@ -465,6 +465,7 @@ public class ConceptMG : MinigameUI
         if (player != null)
         {
             player.SetConceptDrawing(CreateDrawingCopy(), concept);
+            player.SetConceptScore(ComputeScore());
         }
         else
         {

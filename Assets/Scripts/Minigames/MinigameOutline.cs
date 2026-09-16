@@ -11,11 +11,14 @@ public class MinigameOutline : MonoBehaviour
     private ScreenSpaceOutline  outline;
     [SerializeField] private Color availableColor = new Color(1.0f, 0.85f, 0.2f, 1.0f);
     [SerializeField, Min(0)] private float width = 3.0f;
-    [SerializeField, Tooltip("Keep the outline while the player is working at this station")]
+    [SerializeField, Tooltip("Keep the outline while the player is working at this station, in the in-range color")]
     private bool                showWhileActive = false;
+    [SerializeField, Tooltip("Outline color while the player is at the station (needs Show While Active)")]
+    private Color               inRangeColor = Color.yellow;
 
     Minigame    minigame;
     Player      player;
+    Color       restColor;      // The outline's own color, restored when the player is not at the station
 
     void Start()
     {
@@ -31,6 +34,7 @@ public class MinigameOutline : MonoBehaviour
             outline.Refresh();
         }
 
+        restColor = outline.outlineColor;
         outline.enabled = false;
     }
 
@@ -47,6 +51,9 @@ public class MinigameOutline : MonoBehaviour
         bool active = (player.activeMinigame == minigame);
         bool show = available && (showWhileActive || !active);
 
+        // In range: the outline switches to the in-range color so the player knows the station is theirs
+        Color color = active ? inRangeColor : restColor;
+        if (outline.outlineColor != color) outline.outlineColor = color;
         if (outline.enabled != show) outline.enabled = show;
     }
 
