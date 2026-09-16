@@ -82,6 +82,7 @@ public class Player : MonoBehaviour
     public float        modelScore { get; private set; } = -1.0f;
     public float        paintingScore { get; private set; } = -1.0f;
     public float        codingAccuracy { get; private set; } = -1.0f;   // Right characters over the snippet length
+    public int          marketingStars { get; private set; } = -1;     // Already in stars (1-5), set on marketing submit
     public bool         hasCode => codingAccuracy >= 0.0f;
 
     public void SetBrainstormStars(int stars) { brainstormStars = Mathf.Clamp(stars, 0, 5); }
@@ -89,6 +90,7 @@ public class Player : MonoBehaviour
     public void SetModelScore(float score) { modelScore = Mathf.Clamp01(score); }
     public void SetPaintingScore(float score) { paintingScore = Mathf.Clamp01(score); }
     public void SetCodingAccuracy(float accuracy) { codingAccuracy = Mathf.Clamp01(accuracy); }
+    public void SetMarketingStars(int stars) { marketingStars = Mathf.Clamp(stars, 0, 5); }
 
     // Painting produced in the painting station: palette colors per pixel, transparent outside the skin
     public Texture2D    painting { get; private set; }
@@ -134,6 +136,7 @@ public class Player : MonoBehaviour
         modelScore = -1.0f;
         paintingScore = -1.0f;
         codingAccuracy = -1.0f;
+        marketingStars = -1;
         if (skin == null) skin = FindAnyObjectByType<VoxelSkin>();
         if (skin != null) skin.Clear();
     }

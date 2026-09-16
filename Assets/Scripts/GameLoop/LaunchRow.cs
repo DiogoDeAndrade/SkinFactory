@@ -66,6 +66,31 @@ public class LaunchRow : MonoBehaviour
 
     public Tweener.BaseInterpolator Show(float fadeTime) => canvasGroup.FadeIn(fadeTime);
 
+    // Live display (no animation): the row visible with exactly this many stars lit
+    public void SetStars(int count)
+    {
+        if (canvasGroup == null) canvasGroup = GetComponent<CanvasGroup>();
+        canvasGroup.alpha = 1.0f;
+
+        for (int i = 0; i < stars.Count; i++)
+        {
+            var star = stars[i];
+            if (star == null) continue;
+
+            bool lit = i < count;
+            switch (ModeFor(star, out GameObject toggled))
+            {
+                case Mode.ToggleChild:
+                case Mode.ToggleSelf:
+                    toggled.SetActive(lit);
+                    break;
+                default:
+                    star.color = lit ? ((i < ownColors.Count) ? ownColors[i] : Color.white) : emptyColor;
+                    break;
+            }
+        }
+    }
+
     public void LightStar(int index)
     {
         if ((index < 0) || (index >= stars.Count) || (stars[index] == null)) return;

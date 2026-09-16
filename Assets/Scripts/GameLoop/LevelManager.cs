@@ -80,6 +80,12 @@ public class LevelManager : MonoBehaviour
 
     [Header("Day")]
     [SerializeField, Min(1)] private float dayDuration = 300.0f;    // Seconds
+    [SerializeField, Min(0), Tooltip("Profit the first day's launch has to make")]
+    private int                 baseProfitTarget = 10000;
+    [SerializeField, Min(0), Tooltip("Added to the target every day (the bar keeps rising until the player can't clear it)")]
+    private int                 profitTargetStep = 1500;
+    [SerializeField, Min(1.0f), Tooltip("Multiplier applied to the target per day, on top of the step (1 = linear)")]
+    private float               profitTargetGrowth = 1.0f;
     [SerializeField, Tooltip("Where the player starts each day; left where they are if empty")]
     private Transform           playerSpawn;
 
@@ -87,8 +93,9 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI    timerText;      // Optional, "mm:ss"
     [SerializeField] private TextMeshProUGUI    dayText;        // Optional, "Day N"
     [SerializeField] private TextMeshProUGUI    requestText;    // Optional, what the boss asked for today
+    [SerializeField] private TextMeshProUGUI    targetText;     // Optional, today's profit target, "$12,345"
     [SerializeField] private LaunchResults      launchResults;  // Results screen after a release; skipped if empty
-    [SerializeField, Min(0), Tooltip("Stars for categories without a score yet (marketing; every missing station in a debug start)")]
+    [SerializeField, Min(0), Tooltip("Stars for every station not played in a debug start")]
     private int                                 placeholderStars = 3;
     [SerializeField] private CanvasGroup        gameOverPanel;  // Shown on game over; wire its Retry button to Retry()
     [SerializeField] private TextMeshProUGUI    gameOverText;   // Optional, reason
@@ -109,6 +116,16 @@ public class LevelManager : MonoBehaviour
     public int                      attempts { get; private set; }
     public ConceptSO                currentConcept { get; private set; }
     public IReadOnlyList<string>    requestedTags => requested;
+
+    // Profit today's launch has to make: rises every day so the player is eventually fired no matter what
+    public int profitTarget
+    {
+        get
+        {
+            int d = Mathf.Max(0, day - 1);
+            return Mathf.RoundToInt((baseProfitTarget + profitTargetStep * d) * Mathf.Pow(profitTargetGrowth, d));
+        }
+    }
 
     // The timer only runs while the player is working, not while the boss talks or the day changes
     public bool timerRunning => ((state == State.Brainstorm) || (state == State.Production)) && !transitioning;
@@ -227,6 +244,7 @@ public class LevelManager : MonoBehaviour
         PickRequest();
 
         if (dayText) dayText.text = $"Day {day}";
+        if (targetText) targetText.text = $"${profitTarget:N0}";
         UpdateTimerText();
         onDayStarted?.Invoke(day);
 
@@ -346,7 +364,7 @@ public class LevelManager : MonoBehaviour
         state = State.Launch;
         HideReminder();
         if (player != null) player.LockControls(true);
-        launchResults.Show(BuildLaunchCategories(), OnLaunchDone);
+        launchResults.Show(BuildLaunchCategories(), OnLaunchDone, profitTarget);
     }
 
     void OnLaunchDone(bool success, int profit)
@@ -372,6 +390,9 @@ public class LevelManager : MonoBehaviour
 
         int brainstorm = (player != null) ? player.brainstormStars : -1;
         if (brainstorm < 0) brainstorm = debug ? placeholderStars : 0;
+        // Marketing is the one optional station: skipping it is a one-star launch
+        int marketing = (player != null) ? player.marketingStars : -1;
+        if (marketing < 0) marketing = 1;
 
         return new List<LaunchResults.Category>
         {
@@ -380,7 +401,7 @@ public class LevelManager : MonoBehaviour
             new LaunchResults.Category("Modelling", Stars((player != null) ? player.modelScore : -1.0f)),
             new LaunchResults.Category("Texturing", Stars((player != null) ? player.paintingScore : -1.0f)),
             new LaunchResults.Category("Coding",    Stars((player != null) ? player.codingAccuracy : -1.0f)),
-            new LaunchResults.Category("Marketing", placeholderStars),    // No marketing minigame yet
+            new LaunchResults.Category("Marketing", marketing),
         };
     }
 

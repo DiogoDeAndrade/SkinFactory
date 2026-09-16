@@ -43,8 +43,12 @@ public class LaunchResults : MonoBehaviour
     private int             starValue = 800;
     [SerializeField, Min(0), Tooltip("Random extra per star, 0 to this")]
     private int             starBonusMax = 100;
-    [SerializeField, Min(0), Tooltip("Profit needed to survive the day")]
+    [SerializeField, Min(0), Tooltip("Profit needed to survive the day, unless Show is given a target (LevelManager raises it every day)")]
     private int             profitTarget = 10000;
+    [SerializeField, Tooltip("Optional: today's target, see targetFormat")]
+    private TextMeshProUGUI targetText;
+    [SerializeField, Tooltip("How the target is written; {0} = the value")]
+    private string          targetFormat = "Target: ${0:N0}";
     [SerializeField, Tooltip("How the amount is written; {0} = the value")]
     private string          profitFormat = "${0:N0}";
     [SerializeField] private Color lossColor = new Color(1.0f, 0.3f, 0.3f, 1.0f);
@@ -96,9 +100,13 @@ public class LaunchResults : MonoBehaviour
         if (profitRoot != null) profitRoot.SetActive(false);
     }
 
-    // Plays the whole sequence, then reports success (profit reached the target) and the profit
-    public void Show(IList<Category> categories, Action<bool, int> onDone)
+    // Plays the whole sequence, then reports success (profit reached the target) and the profit.
+    // A target of 0 or less keeps the one set on this component.
+    public void Show(IList<Category> categories, Action<bool, int> onDone, int target = 0)
     {
+        if (target > 0) profitTarget = target;
+        if (targetText != null) targetText.text = string.Format(targetFormat, profitTarget);
+
         if (showCR != null) StopCoroutine(showCR);
         showCR = StartCoroutine(ShowCR(categories, onDone));
     }
