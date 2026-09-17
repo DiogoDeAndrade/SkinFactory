@@ -177,20 +177,21 @@ public class SpeechBalloon : MonoBehaviour
         Camera uiCam = ((canvas != null) && (canvas.renderMode != RenderMode.ScreenSpaceOverlay)) ? canvas.worldCamera : null;
         if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(parentRect, screen, uiCam, out Vector2 local)) return;
 
-        // Anchors sit at the parent's centre, so the anchored position is the local point relative to it
-        Vector2 pos = local - parentRect.rect.center;
-
-        // Keep the whole balloon on screen
+        // Keep the whole balloon on screen: the canvas rect, expressed in the parent's local space (the parent can
+        // be any rect under the canvas, not just its root)
+        RectTransform canvasRect = ((canvas != null) && (canvas.rootCanvas != null)) ? canvas.rootCanvas.GetComponent<RectTransform>() : parentRect;
+        Vector3 c0 = parentRect.InverseTransformPoint(canvasRect.TransformPoint(canvasRect.rect.min));
+        Vector3 c1 = parentRect.InverseTransformPoint(canvasRect.TransformPoint(canvasRect.rect.max));
         Vector2 size = root.rect.size;
         Vector2 pivot = root.pivot;
-        Vector2 half = parentRect.rect.size * 0.5f;
-        float minX = -half.x + screenMargin + pivot.x * size.x;
-        float maxX =  half.x - screenMargin - (1.0f - pivot.x) * size.x;
-        float minY = -half.y + screenMargin + pivot.y * size.y;
-        float maxY =  half.y - screenMargin - (1.0f - pivot.y) * size.y;
-        if (minX <= maxX) pos.x = Mathf.Clamp(pos.x, minX, maxX);
-        if (minY <= maxY) pos.y = Mathf.Clamp(pos.y, minY, maxY);
+        float minX = Mathf.Min(c0.x, c1.x) + screenMargin + pivot.x * size.x;
+        float maxX = Mathf.Max(c0.x, c1.x) - screenMargin - (1.0f - pivot.x) * size.x;
+        float minY = Mathf.Min(c0.y, c1.y) + screenMargin + pivot.y * size.y;
+        float maxY = Mathf.Max(c0.y, c1.y) - screenMargin - (1.0f - pivot.y) * size.y;
+        if (minX <= maxX) local.x = Mathf.Clamp(local.x, minX, maxX);
+        if (minY <= maxY) local.y = Mathf.Clamp(local.y, minY, maxY);
 
-        root.anchoredPosition = pos;
+        // Anchors sit at the parent's centre, so the anchored position is the local point relative to it
+        root.anchoredPosition = local - parentRect.rect.center;
     }
 }

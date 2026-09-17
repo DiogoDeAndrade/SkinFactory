@@ -1,0 +1,25 @@
+<size=140%><color=#FFFF00>Skin Factory</color>
+A Game By Diogo de Andrade
+
+<size=120%><color=#E39210>Art
+Blocky Characters by Kenney, CC0 license
+UI Pack by Kenney, CC0 license
+Factory Kit by Kenney, CC0 license
+Mini Arcade by Kenney, CC0 license
+Isometric office by Companion_Cube, CC-BY 4.0 license
+Font Barlow Condensed by Jeremy Tribby, SIL Open Font License
+Font JetBrains Mono by JetBrains, SIL Open Font License
+Concept images and logo by ChatGPT
+Concept outline SVGs by Claude
+Code particle characters rendered with the OCR A Extended font
+Everything else done by Diogo de Andrade, CC0 license
+
+<size=120%><color=#E39210>Sound
+Music by Suno
+Everything else done by Diogo de Andrade, CC0 license
+
+<size=120%><color=#E39210>Code
+Uses UnityCommon library, MIT license
+NaughtyAttributes by Denis Rizov, MIT license
+Some (a lot) of code assisted by Claude
+All remaining game source code by Diogo de Andrade, MIT license

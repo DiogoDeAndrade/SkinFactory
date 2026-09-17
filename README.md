@@ -56,6 +56,11 @@ Then create/fill the `ConceptSO` asset with the three references.
 - [Factory Kit](https://kenney.nl/assets/factory-kit) by [KenneyNL](https://kenney.nl/), [CC0] license.
 - [Mini Arcade](https://kenney.nl/assets/mini-arcade) by [KenneyNL](https://kenney.nl/), [CC0] license.
 - [Isometric office](https://sketchfab.com/3d-models/isometric-office-d31464eed8044190911b221648aca432) by [Companion_Cube](https://sketchfab.com/Companion_Cube), [CC-BY 4.0] license.
+- Font [Barlow Condensed](https://fonts.google.com/specimen/Barlow+Condensed) by Jeremy Tribby, [SIL Open Font License].
+- Font [JetBrains Mono](https://www.jetbrains.com/lp/mono/) by JetBrains, [SIL Open Font License].
+- Concept images and logo by ChatGPT.
+- Concept outline SVGs by Claude (the sketches are derived from them with `Tools/sketchify_svg.py`).
+- Code particle character sheet rendered with the OCR A Extended font (Microsoft, bundled with Windows).
 - Everything else done by [Diogo de Andrade], licensed through the [CC0] license.
 
 ## Sound
@@ -66,6 +71,7 @@ Then create/fill the `ConceptSO` asset with the three references.
 
 - Uses [Unity Common], [MIT] license.
 - [NaughtyAttributes] by Denis Rizov available through the [MIT] license.
+- Some (a lot) of code assisted by Claude.
 - All remaining game source code by Diogo de Andrade is licensed under the [MIT] license.
 
 ## Metadata
@@ -82,3 +88,4 @@ Then create/fill the `ConceptSO` asset with the three references.
 [Unity Common]:https://github.com/DiogoDeAndrade/UnityCommon
 [NaughtyAttributes]:https://github.com/dbrizov/NaughtyAttributes.git#upm
 [MIT]:LICENSE
+[SIL Open Font License]:https://openfontlicense.org/
