@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: BuildDefs
   m_EditorClassIdentifier: Assembly-CSharp::UC.BuildDefs
   version: 1.0.0
-  username: defaultuser
-  projectName: com.unity.template.urp-blank
+  username: diogoandrade
+  projectName: skin-factory
   buildWindows: 1
   buildWeb: 0
-  createZipFiles: 0
-  uploadToItch: 0
+  createZipFiles: 1
+  uploadToItch: 1
   overrideGraphicsSettings: 0
   windowsRenderPipelineAsset: {fileID: 0}
   webGLRenderPipelineAsset: {fileID: 0}
