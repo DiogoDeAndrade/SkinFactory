@@ -1,28 +1,40 @@
 # Skin Factory
 
+![Title](Screenshots/logo.png)
+
 Developed for the [Replay European Masters in Games](https://replay.pt/), with the theme "Beyond the Skin".
 
 ## Game
 
-TBD
+Welcome to the skin factory. Not a game studio. A skin-first experience platform.
 
-## Todo
+Every morning the boss tells you what the players want this time. Something cute and scary. Something edgy and premium. Something that trends. You have one day to make it, and the bar for "enough profit" goes up every single day. It is not a question of whether you get fired. It is a question of when.
 
-In order:
+### A day at the factory
+
+Brainstorm. Grab ideas from the machines, a noun, a style and a gimmick, and pitch the combination to the boss. He will let you know if it is rubbish. After three rubbish pitches he picks the skin himself, and you can guess how that goes.
+Concept. Trace the concept art. The closer you are, the better the stars.
+Modelling. Rebuild the shape from straight segments, on a budget.
+Texturing. Paint the regions with the palette you are given.
+Coding. Type the code. Exactly. Backspace is allowed. Mistakes are also allowed, but remembered.
+Marketing. Moderate the community: delete every post that hurts the brand, keep the ones that sell. Stop whenever you are happy with the numbers, or push your luck for one more wave.
+Launch. Pull the lever, watch the stars roll in, watch the profit count up. Green means you keep your job. Red means you meet the boss one last time.
+
+### Controls
+
+* WASD or arrows to move
+* Space to grab and drop ideas and to pull the launch lever
+* Mouse to do your job!
+*  Escape to walk away from the keyboard.
+
+Made in three days for the Replay III Game Jam, theme "Beyond the Skin". 
+
+## Future
 
 1. Water system (we need water periodically)
 2. Boss demands (stretch goal): from a certain point on the boss roams the office; touching the player adds
    demands to the skin (make it blue, only half the segments, ...)
-3. Main menu + credits screen
-4. Music and sound
-
-Ongoing:
-
-* Improve explanation of regions
-* Assist: show an idea's categories (tags) on its balloon, not just the name
-
-Done: boss briefing and pitch verdicts, brainstorm scoring, coding minigame, marketing minigame (optional,
-1 star if skipped), release console, launch results with profit, game over, day transition, twelve concepts.
+3. Sound
 
 ## Concept pipeline
 
@@ -65,6 +77,7 @@ Then create/fill the `ConceptSO` asset with the three references.
 
 ## Sound
 
+- Music by [Suno](www.suno.com)
 - Everything else done by [Diogo de Andrade], licensed through the [CC0] license.
 
 ## Code
