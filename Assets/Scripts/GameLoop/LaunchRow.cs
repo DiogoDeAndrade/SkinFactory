@@ -31,6 +31,7 @@ public class LaunchRow : MonoBehaviour
 
     CanvasGroup     canvasGroup;
     List<Color>     ownColors = new List<Color>();   // Each star's color as authored, restored when lit
+    int             litCount = -1;                   // Stars lit by the last SetStars, so only new ones pop
 
     void Awake()
     {
@@ -62,15 +63,20 @@ public class LaunchRow : MonoBehaviour
             star.transform.localScale = Vector3.one;
         }
         canvasGroup.alpha = 0.0f;
+        litCount = 0;
     }
 
     public Tweener.BaseInterpolator Show(float fadeTime) => canvasGroup.FadeIn(fadeTime);
 
-    // Live display (no animation): the row visible with exactly this many stars lit
+    // Live display: the row visible with exactly this many stars lit. Stars gained since the last call pop like
+    // on the results screen; lost ones just go dark. The first call sets the state without popping.
     public void SetStars(int count)
     {
         if (canvasGroup == null) canvasGroup = GetComponent<CanvasGroup>();
         canvasGroup.alpha = 1.0f;
+
+        count = Mathf.Clamp(count, 0, stars.Count);
+        bool first = litCount < 0;
 
         for (int i = 0; i < stars.Count; i++)
         {
@@ -78,6 +84,12 @@ public class LaunchRow : MonoBehaviour
             if (star == null) continue;
 
             bool lit = i < count;
+            if (lit && !first && (i >= litCount))
+            {
+                LightStar(i);
+                continue;
+            }
+
             switch (ModeFor(star, out GameObject toggled))
             {
                 case Mode.ToggleChild:
@@ -88,7 +100,13 @@ public class LaunchRow : MonoBehaviour
                     star.color = lit ? ((i < ownColors.Count) ? ownColors[i] : Color.white) : emptyColor;
                     break;
             }
+            if (!lit)
+            {
+                star.transform.Tween().Stop("StarPop", Tweener.StopBehaviour.Cancel);
+                star.transform.localScale = Vector3.one;
+            }
         }
+        litCount = count;
     }
 
     public void LightStar(int index)

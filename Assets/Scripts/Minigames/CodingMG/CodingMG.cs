@@ -6,9 +6,11 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
-// Coding station: the player retypes a code snippet. Characters turn green when right and red when wrong;
-// backspace takes the last one back, or the player can push on and leave the mistake behind. Accuracy (right
-// characters over the snippet length) is handed to the Player on submit.
+// Coding station: the player retypes a code snippet against the clock. Characters turn green when right and red
+// when wrong; backspace takes the last one back, or the player can push on and leave the mistake behind.
+// The time limit is built from the snippet (a base, so much per character, extra for newlines and indentation)
+// and only runs while the player is typing. When it runs out, or the snippet is finished, the score is handed to
+// the Player: right characters count 1, wrong ones -wrongPenalty, untyped ones 0, over the snippet length.
 // Player controls are locked while typing, since WASD and space are just characters here; Escape leaves the
 // station, and it stays unusable until the player walks off so it doesn't grab them straight back.
 // One snippet per day, picked on reset from the code files and inline snippets.
@@ -24,7 +26,11 @@ public class CodingMG : MinigameUI
 
     [Header("UI references")]
     [SerializeField] private TextMeshProUGUI    codeText;       // The snippet, colored as the player types (rich text on, no wrap)
-    [SerializeField] private TextMeshProUGUI    accuracyText;   // Optional, accuracy and progress
+    [SerializeField] private TextMeshProUGUI    accuracyText;   // Optional, score and progress
+    [SerializeField, Tooltip("Optional: filled image showing the time left")]
+    private Image                               timeFill;
+    [SerializeField, Tooltip("Optional: the stars earned so far on a star row (a StarMeter instance)")]
+    private LaunchRow                           starRow;
     [SerializeField] private Button             submitButton;   // Optional, interactable once the snippet is fully typed
     [SerializeField, Tooltip("Played when the snippet is submitted (the rising code characters); optional")]
     private ParticleSystem                      submitParticles;
@@ -37,6 +43,24 @@ public class CodingMG : MinigameUI
     private Color                   wrongMarkColor = new Color(1.0f, 0.2f, 0.2f, 0.35f);
     [SerializeField, Tooltip("Highlight on the character to type next")]
     private Color                   caretMarkColor = new Color(1.0f, 1.0f, 1.0f, 0.3f);
+    [SerializeField, Tooltip("Color of the character to type next, so it stands out from the pending text and its highlight")]
+    private Color                   caretColor = Color.white;
+    [SerializeField, Tooltip("Underline the character to type next")]
+    private bool                    caretUnderline = true;
+
+    [Header("Time limit")]
+    [SerializeField, Min(0), Tooltip("Seconds given regardless of the snippet")]
+    private float               baseTime = 3.0f;
+    [SerializeField, Min(0), Tooltip("Seconds per character of the snippet")]
+    private float               timePerCharacter = 0.5f;
+    [SerializeField, Min(0), Tooltip("Extra seconds per line break (Enter)")]
+    private float               extraTimePerNewline = 1.0f;
+    [SerializeField, Min(0), Tooltip("Extra seconds per tab's worth of indentation at the start of a line")]
+    private float               extraTimePerIndent = 0.5f;
+
+    [Header("Scoring")]
+    [SerializeField, Min(0), Tooltip("A wrong character counts this much against the score (a right one counts 1, an untyped one 0)")]
+    private float               wrongPenalty = 0.5f;
 
     [Header("Rules")]
     [SerializeField, Tooltip("Submit on its own once the last character is typed")]
@@ -46,9 +70,12 @@ public class CodingMG : MinigameUI
     [SerializeField, Min(0)] private float backspaceRepeatDelay = 0.4f;
     [SerializeField, Min(0)] private float backspaceRepeatRate = 0.04f;
 
-    // Right characters over the snippet length (over what was typed so far while still typing)
-    public float    accuracy => ComputeAccuracy(isComplete);
+    // Score in [0,1] over the whole snippet: right characters 1, wrong -wrongPenalty, untyped 0
+    public float    accuracy => ComputeScore();
+    public int      stars => LaunchResults.StarsFor(accuracy);
     public bool     isComplete => typed.Count >= target.Length;
+    public float    timeLeft { get; private set; }
+    public float    timeLimit { get; private set; }
     public bool     isDone => codeDone;
     public string   snippet => target;
 
@@ -167,6 +194,15 @@ public class CodingMG : MinigameUI
 
         if (textDirty) UpdateUI();
 
+        // The clock only runs while typing; out of time, whatever is on screen is submitted
+        timeLeft = Mathf.Max(0.0f, timeLeft - Time.deltaTime);
+        UpdateTimeFill();
+        if (timeLeft <= 0.0f)
+        {
+            Submit();
+            return;
+        }
+
         if (autoSubmit && isComplete)
         {
             autoSubmitLeft -= Time.deltaTime;
@@ -267,7 +303,7 @@ public class CodingMG : MinigameUI
         if (codeDone) return;
 
         codeDone = true;
-        float result = ComputeAccuracy(true);
+        float result = ComputeScore();
         StopTyping();
 
         if (player == null) player = FindAnyObjectByType<Player>();
@@ -280,12 +316,30 @@ public class CodingMG : MinigameUI
         canvasGroup.FadeOut(0.1f);
     }
 
-    // Over the whole snippet once finished (or asked for), over what was typed so far otherwise
-    float ComputeAccuracy(bool ofWholeSnippet)
+    // Over the whole snippet, so it is also what the player gets if the time ran out right now
+    float ComputeScore()
     {
-        int denominator = ofWholeSnippet ? target.Length : typed.Count;
-        if (denominator == 0) return ofWholeSnippet ? 1.0f : 0.0f;
-        return Mathf.Clamp01(correctCount / (float)denominator);
+        if (target.Length == 0) return 1.0f;
+        int wrong = typed.Count - correctCount;
+        return Mathf.Clamp01((correctCount - wrongPenalty * wrong) / target.Length);
+    }
+
+    // Time for the snippet: a base, so much per character, and extra for every line break and every tab's worth
+    // of indentation at the start of a line, since those take longer to type than a plain character
+    float ComputeTimeLimit()
+    {
+        float time = baseTime + timePerCharacter * target.Length;
+
+        foreach (var line in target.Split('\n'))
+        {
+            int leading = line.Length - line.TrimStart(' ').Length;
+            time += extraTimePerIndent * Mathf.CeilToInt(leading / (float)Mathf.Max(1, tabSize));
+        }
+        for (int i = 0; i < target.Length; i++)
+        {
+            if (target[i] == '\n') time += extraTimePerNewline;
+        }
+        return time;
     }
 
     #region Snippets
@@ -311,6 +365,7 @@ public class CodingMG : MinigameUI
         if (pool.Count == 0)
         {
             target = "";
+            timeLimit = timeLeft = 0.0f;
             Debug.LogWarning("CodingMG: no code snippets assigned", this);
             return;
         }
@@ -321,6 +376,8 @@ public class CodingMG : MinigameUI
         lastSnippetIndex = index;
 
         target = Normalize(pool[index]);
+        timeLimit = ComputeTimeLimit();
+        timeLeft = timeLimit;
     }
 
     string Normalize(string code)
@@ -343,10 +400,17 @@ public class CodingMG : MinigameUI
 
         if (accuracyText)
         {
-            int percent = Mathf.RoundToInt(ComputeAccuracy(isComplete) * 100.0f);
-            accuracyText.text = $"Accuracy {percent}%   {typed.Count} / {target.Length}";
+            int percent = Mathf.RoundToInt(ComputeScore() * 100.0f);
+            accuracyText.text = $"Score {percent}%   {typed.Count} / {target.Length}";
         }
+        if (starRow != null) starRow.SetStars(stars);
         if (submitButton) submitButton.interactable = isComplete && !codeDone;
+        UpdateTimeFill();
+    }
+
+    void UpdateTimeFill()
+    {
+        if (timeFill != null) timeFill.fillAmount = (timeLimit > 0.0f) ? Mathf.Clamp01(timeLeft / timeLimit) : 0.0f;
     }
 
     CharState StateAt(int i)
@@ -385,13 +449,17 @@ public class CodingMG : MinigameUI
         {
             case CharState.Correct: sb.Append("<color=#").Append(Hex(correctColor)).Append('>'); break;
             case CharState.Wrong:   sb.Append("<color=#").Append(Hex(wrongColor)).Append("><mark=#").Append(Hex(wrongMarkColor)).Append('>'); break;
-            case CharState.Caret:   sb.Append("<color=#").Append(Hex(pendingColor)).Append("><mark=#").Append(Hex(caretMarkColor)).Append('>'); break;
+            case CharState.Caret:
+                sb.Append("<color=#").Append(Hex(caretColor)).Append("><mark=#").Append(Hex(caretMarkColor)).Append('>');
+                if (caretUnderline) sb.Append("<u>");
+                break;
             default:                sb.Append("<color=#").Append(Hex(pendingColor)).Append('>'); break;
         }
     }
 
     void CloseRun(StringBuilder sb, CharState state)
     {
+        if ((state == CharState.Caret) && caretUnderline) sb.Append("</u>");
         if ((state == CharState.Wrong) || (state == CharState.Caret)) sb.Append("</mark>");
         sb.Append("</color>");
     }
