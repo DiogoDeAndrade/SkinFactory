@@ -224,9 +224,11 @@ public class LevelManager : MonoBehaviour
         Time.timeScale = 1.0f;
 
         // Fresh pipeline: nothing carried, every station back to its initial state, no concept until the boss picks one.
-        // A debug starting stage on the player (day one only) is kept, and the day jumps straight to production.
+        // A debug starting stage on the player (day one only) is kept, and the day jumps straight to production;
+        // so does a debug "skip brainstorm" (every day), with a random concept.
         if (player == null) player = FindAnyObjectByType<Player>();
         bool debugStart = (day == 1) && (player != null) && player.debugStageActive;
+        bool skipBrainstorm = debugStart || ((player != null) && player.skipBrainstorm);
         if ((player != null) && (playerSpawn != null)) player.Teleport(playerSpawn);
         if (!debugStart)
         {
@@ -248,9 +250,9 @@ public class LevelManager : MonoBehaviour
         UpdateTimerText();
         onDayStarted?.Invoke(day);
 
-        if (debugStart)
+        if (skipBrainstorm)
         {
-            ConceptSO concept = (player.conceptDrawingSource != null) ? player.conceptDrawingSource : PickConcept();
+            ConceptSO concept = (debugStart && (player.conceptDrawingSource != null)) ? player.conceptDrawingSource : PickConcept();
             StartProduction(concept);
             return;
         }
@@ -386,10 +388,11 @@ public class LevelManager : MonoBehaviour
     List<LaunchResults.Category> BuildLaunchCategories()
     {
         bool debug = (player != null) && player.debugStageActive;
+        bool skippedBrainstorm = (player != null) && player.skipBrainstorm;
         int Stars(float score) => (score >= 0.0f) ? LaunchResults.StarsFor(score) : (debug ? placeholderStars : 0);
 
         int brainstorm = (player != null) ? player.brainstormStars : -1;
-        if (brainstorm < 0) brainstorm = debug ? placeholderStars : 0;
+        if (brainstorm < 0) brainstorm = (debug || skippedBrainstorm) ? placeholderStars : 0;
         // Marketing is the one optional station: skipping it is a one-star launch
         int marketing = (player != null) ? player.marketingStars : -1;
         if (marketing < 0) marketing = 1;

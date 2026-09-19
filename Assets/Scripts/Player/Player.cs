@@ -54,17 +54,22 @@ public class Player : MonoBehaviour
     [Header("Debug")]
     [SerializeField, Tooltip("Use the debug starting stage below; off = a normal start, the fields are kept for later")]
     private bool        debugMode = false;
-    [SerializeField, Tooltip("Start already carrying this drawing (a PNG saved by the concept station), skipping that station")]
+    [SerializeField, Tooltip("Start already carrying this drawing (a PNG saved by the concept station), skipping that station"), ShowIf(nameof(debugMode))]
     private Texture2D   debugConceptDrawing;
-    [SerializeField, Tooltip("Concept the debug drawing belongs to (used for the segment hint)")]
+    [SerializeField, Tooltip("Concept the debug drawing belongs to (used for the segment hint)"), ShowIf(nameof(debugMode))]
     private ConceptSO   debugConceptSource;
-    [SerializeField, Tooltip("Start already carrying this model (saved by the modelling station), skipping the concept and modelling stations. Overrides the debug drawing above.")]
+    [SerializeField, Tooltip("Start already carrying this model (saved by the modelling station), skipping the concept and modelling stations. Overrides the debug drawing above."), ShowIf(nameof(debugMode))]
     private ModelDataSO debugModel;
-    [SerializeField, Tooltip("Start already carrying this painting (a PNG saved by the painting station), skipping all three stations. Needs the debug model above for the earlier data.")]
+    [SerializeField, Tooltip("Start already carrying this painting (a PNG saved by the painting station), skipping all three stations. Needs the debug model above for the earlier data."), ShowIf(nameof(debugMode))]
     private Texture2D   debugPainting;
+    [SerializeField, Tooltip("Skip the briefing and brainstorm: every day starts straight in production with a random concept"), ShowIf(nameof(debugMode))]
+    private bool        debugSkipBrainstorm = false;
 
     // A debug starting stage is on, so the first day should keep it instead of resetting the pipeline
     public bool debugStageActive => debugMode && ((debugConceptDrawing != null) || (debugModel != null) || (debugPainting != null));
+
+    // Debug: the day skips the briefing and brainstorm and starts in production (brainstorm scored as a placeholder)
+    public bool skipBrainstorm => debugMode && debugSkipBrainstorm;
 
     // Drawing produced in the concept art station (owned by the player, destroyed on replace)
     public Texture2D    conceptDrawing { get; private set; }
