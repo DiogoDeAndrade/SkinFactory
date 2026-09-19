@@ -29,12 +29,28 @@ Launch. Pull the lever, watch the stars roll in, watch the profit count up. Gree
 
 Made in three days for the Replay III Game Jam, theme "Beyond the Skin". 
 
+## Todo
+
+Next release, for the [Game Creators Club](https://game-creators-club.itch.io/):
+
+1. Improved coding minigame: add a time limit and a better display of the current character
+2. Prompts before each minigame starts ("Draw", "Model", "Paint", "Code", "Remove bad reviews"), with an
+   icon explaining what to use (keyboard, mouse)
+3. Show the money goal in some way, so the player sees it increasing with time
+4. Progressive build of the skin: the model appears first as just lines, then as polygons, then with the
+   actual painting, with a cutscene showing it
+5. Build a voxel model in the sketch phase, but then use the extruded polygon outlines and texturing
+6. Improved painting minigame: paint with a brush, choosing brush size and pattern as well as color, to make
+   it more fun. The game scores how well you painted: how much of the area inside the regions you actually
+   covered, minus how much you painted outside them
+7. Sounds
+
 ## Future
 
-1. Water system (we need water periodically)
-2. Boss demands (stretch goal): from a certain point on the boss roams the office; touching the player adds
+1. After the skin is released, play a level of an appropriate game with it (several types of games)
+2. Water system (we need water periodically)
+3. Boss demands (stretch goal): from a certain point on the boss roams the office; touching the player adds
    demands to the skin (make it blue, only half the segments, ...)
-3. Sound
 
 ## Concept pipeline
 
