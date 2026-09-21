@@ -88,6 +88,7 @@ public class MarketingMG : MinigameUI
 
     public override void ResetStation()
     {
+        base.ResetStation();
         StopWaves();
         marketingDone = false;
         processedCount = 0;
@@ -108,8 +109,8 @@ public class MarketingMG : MinigameUI
     {
         base.Activate();
         if (player == null) player = FindAnyObjectByType<Player>();
-        if (!marketingDone) StartWaves();
         UpdateUI();
+        if (!marketingDone) ShowPrompt(StartWaves);
     }
 
     // Walking off clears the board; the processed count and wave difficulty carry on when the player comes back

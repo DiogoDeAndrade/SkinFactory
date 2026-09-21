@@ -99,6 +99,7 @@ public class ModellingMG : MinigameUI
 
     public override void ResetStation()
     {
+        base.ResetStation();
         modelDone = false;
         editingEnabled = false;
         SetDrawing(null);
@@ -124,9 +125,11 @@ public class ModellingMG : MinigameUI
         var tex = (player != null) ? player.conceptDrawing : null;
         if (tex != drawing) SetDrawing(tex);
 
-        editingEnabled = (drawing != null) && !modelDone;
+        editingEnabled = false;
         RefreshGraphic();
         UpdateUI();
+
+        if ((drawing != null) && !modelDone) ShowPrompt(() => editingEnabled = true);
     }
 
     public override void Deactivate()

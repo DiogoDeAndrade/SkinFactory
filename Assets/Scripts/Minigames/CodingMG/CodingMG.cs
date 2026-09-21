@@ -117,6 +117,7 @@ public class CodingMG : MinigameUI
 
     public override void ResetStation()
     {
+        base.ResetStation();
         StopTyping();
         codeDone = false;
         leaving = false;
@@ -149,9 +150,10 @@ public class CodingMG : MinigameUI
         if (player == null) player = FindAnyObjectByType<Player>();
         if (target.Length == 0) PickSnippet();
 
-        if (!codeDone) StartTyping();
         textDirty = true;
         UpdateUI();
+
+        if (!codeDone) ShowPrompt(StartTyping);
     }
 
     public override void Deactivate()

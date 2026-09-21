@@ -79,6 +79,7 @@ public class ConceptMG : MinigameUI
     {
         this.concept = concept;
 
+        ResetPrompt();
         introDone = false;
         drawDone = false;
         drawingEnabled = false;
@@ -171,6 +172,9 @@ public class ConceptMG : MinigameUI
         SetAlpha(conceptImage, 0.0f);
         SetAlpha(sketchImage, 1.0f);
         SetAlpha(drawImage, 1.0f);
+
+        // "Draw" card, first time only
+        yield return PromptCR();
 
         introDone = true;
         drawingEnabled = true;
@@ -514,5 +518,9 @@ public class ConceptMG : MinigameUI
     // Unusable until the day's concept is known (LevelManager sets it once the pitch is done)
     public override bool CanUse(Player player) => (concept != null) && !drawDone && ((player == null) || (player.conceptDrawing == null));
 
-    public override void ResetStation() => Set(concept);
+    public override void ResetStation()
+    {
+        base.ResetStation();
+        Set(concept);
+    }
 }

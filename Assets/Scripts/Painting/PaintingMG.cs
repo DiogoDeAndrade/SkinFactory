@@ -136,6 +136,7 @@ public class PaintingMG : MinigameUI
 
     public override void ResetStation()
     {
+        base.ResetStation();
         paintDone = false;
         paintingEnabled = false;
         SetModel(null);
@@ -160,8 +161,10 @@ public class PaintingMG : MinigameUI
         var polygons = (player != null) ? player.modelPolygons : null;
         if (polygons != model) SetModel(polygons);
 
-        paintingEnabled = (model != null) && !paintDone;
+        paintingEnabled = false;
         UpdateUI();
+
+        if ((model != null) && !paintDone) ShowPrompt(() => paintingEnabled = true);
     }
 
     public override void Deactivate()
