@@ -2261,7 +2261,7 @@ GameObject:
   - component: {fileID: 153600366}
   - component: {fileID: 153600364}
   m_Layer: 0
-  m_Name: Camera
+  m_Name: BossCamera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12580,6 +12580,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1715046812}
+  - {fileID: 1946994866}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &836306545
@@ -12601,6 +12602,10 @@ MonoBehaviour:
   fallbackTalkTime: 3
   lineGap: 0.6
   bossTalkRange: 2.5
+  skinCamera: {fileID: 1916679296}
+  skinDisplay: {fileID: 1364983435}
+  showcaseLead: 1
+  showcaseHold: 4
   dayWipeTime: 0.5
   dayWipeType: -1
   requestLine: The market is asking for something {0}!
@@ -18860,13 +18865,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 68b196acbd6349b4ebbdafd1f20830ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VoxelSkin
+  canvasSize: {x: 1.5, y: 1.5}
+  depth: 0.2
   xyGridSize: 1
   zGridSize: 1
-  voxelSize: {x: 0.009, y: 0.009, z: 0.4}
   cullHiddenFaces: 1
+  layerOffset: 0.005
+  paperColor: {r: 0.95, g: 0.94, b: 0.9, a: 1}
+  bleedPixels: 2
   offset: {x: 0, y: 1.5, z: 0}
   rotation: {x: 0, y: 0, z: 0}
   spinSpeed: 90
+  growTime: 0.4
+  popScale: 1.2
+  popTime: 0.3
   materialTemplate: {fileID: 0}
 --- !u!1 &1367300975
 GameObject:
@@ -20155,7 +20167,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aba353aba9657ce4a83a5b92c5b99139, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player
-  skin: {fileID: 0}
   pickRange: 1.5
   playerInput: {fileID: 1465657841}
   interactInput:
@@ -20168,10 +20179,10 @@ MonoBehaviour:
     inputAction: Interact
   holdPoint: {fileID: 1567241330}
   debugMode: 1
-  debugConceptDrawing: {fileID: 2800000, guid: 081e6cb61dbafd149879e90f75d56feb, type: 3}
-  debugConceptSource: {fileID: 11400000, guid: 3b7528ef645bf75439add2ed2df3b854, type: 2}
-  debugModel: {fileID: 11400000, guid: 52dab16860f64554088de533eff7f1d9, type: 2}
-  debugPainting: {fileID: 2800000, guid: bbe1964fe781ff6488d418996aa36269, type: 3}
+  debugConceptDrawing: {fileID: 0}
+  debugConceptSource: {fileID: 0}
+  debugModel: {fileID: 0}
+  debugPainting: {fileID: 0}
   debugSkipBrainstorm: 1
 --- !u!1 &1467696897
 GameObject:
@@ -24261,6 +24272,134 @@ MonoBehaviour:
   blendDistance: 0
   weight: 1
   sharedProfile: {fileID: 11400000, guid: f8cb683d0c8c8c64680c420c6cd9a5c0, type: 2}
+--- !u!1 &1916679293
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1916679294}
+  - component: {fileID: 1916679296}
+  - component: {fileID: 1916679295}
+  m_Layer: 0
+  m_Name: SkinotronCamera
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &1916679294
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1916679293}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.28152958, y: 0.24758147, z: -0.07543551, w: 0.9239881}
+  m_LocalPosition: {x: -1.23, y: 3, z: -2.43}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1946994866}
+  m_LocalEulerAnglesHint: {x: 33.891, y: 30, z: 0}
+--- !u!114 &1916679295
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1916679293}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalCameraData
+  m_RenderShadows: 1
+  m_RequiresDepthTextureOption: 2
+  m_RequiresOpaqueTextureOption: 2
+  m_CameraType: 0
+  m_Cameras: []
+  m_RendererIndex: -1
+  m_VolumeLayerMask:
+    serializedVersion: 2
+    m_Bits: 1
+  m_VolumeTrigger: {fileID: 0}
+  m_VolumeFrameworkUpdateModeOption: 2
+  m_RenderPostProcessing: 0
+  m_Antialiasing: 0
+  m_AntialiasingQuality: 2
+  m_StopNaN: 0
+  m_Dithering: 0
+  m_ClearDepth: 1
+  m_AllowXRRendering: 1
+  m_AllowHDROutput: 1
+  m_UseScreenCoordOverride: 0
+  m_ScreenSizeOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_ScreenCoordScaleBias: {x: 0, y: 0, z: 0, w: 0}
+  m_RequiresDepthTexture: 0
+  m_RequiresColorTexture: 0
+  m_TaaSettings:
+    m_Quality: 3
+    m_FrameInfluence: 0.1
+    m_JitterScale: 1
+    m_MipBias: 0
+    m_VarianceClampScale: 0.9
+    m_ContrastAdaptiveSharpening: 0
+  m_Version: 2
+--- !u!20 &1916679296
+Camera:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1916679293}
+  m_Enabled: 1
+  serializedVersion: 2
+  m_ClearFlags: 1
+  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_projectionMatrixMode: 1
+  m_GateFitMode: 2
+  m_FOVAxisMode: 0
+  m_Iso: 200
+  m_ShutterSpeed: 0.005
+  m_Aperture: 16
+  m_FocusDistance: 10
+  m_FocalLength: 50
+  m_BladeCount: 5
+  m_Curvature: {x: 2, y: 11}
+  m_BarrelClipping: 0.25
+  m_Anamorphism: 0
+  m_SensorSize: {x: 36, y: 24}
+  m_LensShift: {x: 0, y: 0}
+  m_NormalizedViewPortRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
+  near clip plane: 0.3
+  far clip plane: 1000
+  field of view: 60
+  orthographic: 0
+  orthographic size: 5
+  m_Depth: 1
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RenderingPath: -1
+  m_TargetTexture: {fileID: 0}
+  m_TargetDisplay: 0
+  m_TargetEye: 3
+  m_HDR: 1
+  m_AllowMSAA: 1
+  m_AllowDynamicResolution: 0
+  m_ForceIntoRT: 0
+  m_OcclusionCulling: 1
+  m_StereoConvergence: 10
+  m_StereoSeparation: 0.022
 --- !u!1 &1933444003
 GameObject:
   m_ObjectHideFlags: 0
@@ -24694,6 +24833,38 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1946035907}
   m_Mesh: {fileID: -5297082910012631980, guid: 3b520767ab5483348a47991c7d61587c, type: 3}
+--- !u!1 &1946994865
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1946994866}
+  m_Layer: 0
+  m_Name: SkinotronSpawn
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1946994866
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1946994865}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 18.43, y: 0, z: -16.16}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1916679294}
+  m_Father: {fileID: 836306544}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1954905518
 GameObject:
   m_ObjectHideFlags: 0
