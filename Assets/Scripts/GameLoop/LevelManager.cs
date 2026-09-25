@@ -88,6 +88,8 @@ public class LevelManager : MonoBehaviour
     private float               profitTargetGrowth = 1.0f;
     [SerializeField, Tooltip("Where the player starts each day; left where they are if empty")]
     private Transform           playerSpawn;
+    [SerializeField, Tooltip("Snapped onto the player behind the day change wipe; found in the scene if left empty")]
+    private OrbitCameraController playerCamera;
 
     [Header("UI references")]
     [SerializeField] private TextMeshProUGUI    timerText;      // Optional, "mm:ss"
@@ -161,6 +163,7 @@ public class LevelManager : MonoBehaviour
         player = FindAnyObjectByType<Player>();
         machines = FindObjectsByType<IdeaMachine>();
         if (conceptStation == null) conceptStation = FindAnyObjectByType<ConceptMG>();
+        if (playerCamera == null) playerCamera = FindAnyObjectByType<OrbitCameraController>();
         if (bossAnchor == null) bossAnchor = transform;
 
         HideGameOver();
@@ -436,6 +439,11 @@ public class LevelManager : MonoBehaviour
         if (launchResults != null) launchResults.Hide(0.0f);
         StartDay();
         transitioning = false;
+
+        // Camera straight onto the player's new spot while still covered. After a physics step, so the zoom
+        // triggers have seen the teleport and the zoom snaps to the right value too.
+        yield return new WaitForFixedUpdate();
+        if (playerCamera != null) playerCamera.Snap();
 
         bool revealed = false;
         FullscreenWiper.WipeIn(dayWipeTime, dayWipeType, () => revealed = true);

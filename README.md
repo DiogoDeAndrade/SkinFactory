@@ -33,10 +33,10 @@ Made in three days for the Replay III Game Jam, theme "Beyond the Skin".
 
 Next release, for the [Game Creators Club](https://game-creators-club.itch.io/):
 
-1. Improved coding minigame: add a time limit and a better display of the current character
+1. ~~Improved coding minigame: add a time limit and a better display of the current character~~ (done)
 2. ~~Prompts before each minigame starts ("Draw", "Model", "Paint", "Code", "Remove bad reviews"), with an
    icon explaining what to use (keyboard, mouse)~~ (done)
-3. Show the money goal in some way, so the player sees it increasing with time
+3. ~~Show the money goal in some way, so the player sees it increasing with time~~ (done)
 4. Progressive build of the skin: the model appears first as just lines, then as polygons, then with the
    actual painting, with a cutscene showing it
 5. Build a voxel model in the sketch phase, but then use the extruded polygon outlines and texturing

@@ -4,12 +4,16 @@ using System.Collections.Generic;
 using TMPro;
 using UC;
 using UnityEngine;
+using UnityEngine.UI;
 
 // The "Skin Launched!" results screen. Fades in with only the title, then one row per category: the row appears
-// with dark stars and the stars earned light up one at a time. Last comes the profit, counting up from zero, red
-// until it reaches the target and green from there. The caller gets the outcome once the screen has been read.
+// with dark stars and the stars earned light up one at a time. Last comes the profit, counting up from zero on a
+// bar scaled to the target: the fill and the profit marker grow toward the target marker at the end. Once the profit
+// passes the target the target marker pops and the bar is scaled to the profit instead: it stays full, the profit
+// marker stays at the end and the target marker slides back. The fill and the amount are colored by a gradient over
+// profit / target. The caller gets the outcome once the screen has been read.
 // Lives on the Launch panel (a vertical layout): rows are instantiated from the prefab and inserted after
-// rowsAfter (the first separator), the profit text is cloned from the title if none is assigned.
+// rowsAfter (the first separator).
 [RequireComponent(typeof(CanvasGroup))]
 public class LaunchResults : MonoBehaviour
 {
@@ -31,12 +35,20 @@ public class LaunchResults : MonoBehaviour
     private TextMeshProUGUI titleText;
     [SerializeField]
     private LaunchRow       rowPrefab;
-    [SerializeField, Tooltip("Rows are inserted right after this sibling; at the end of the panel if left empty")]
+    [SerializeField, Tooltip("Rows are inserted right after this sibling; right before the profit row if left empty")]
     private Transform       rowsAfter;
-    [SerializeField, Tooltip("Profit line; a copy of the title at the bottom of the panel if left empty")]
-    private TextMeshProUGUI profitText;
-    [SerializeField, Tooltip("Object hidden until the profit is shown (the row holding the label and the amount); the profit text's parent if left empty")]
+    [SerializeField, Tooltip("Row holding the profit label and bar, hidden until the profit is shown")]
     private GameObject      profitRoot;
+    [SerializeField, Tooltip("Filled (horizontal) image the profit fills; the markers travel along its width")]
+    private Image           profitFill;
+    [SerializeField, Tooltip("Follows the fill's edge until the target is reached, then stays at the end. Only its x is driven")]
+    private RectTransform   profitMarker;
+    [SerializeField, Tooltip("The amount, inside the profit marker")]
+    private TextMeshProUGUI profitText;
+    [SerializeField, Tooltip("At the end of the bar until the profit passes it, then slides back. Only its x is driven")]
+    private RectTransform   targetMarker;
+    [SerializeField, Tooltip("Today's target, inside the target marker")]
+    private TextMeshProUGUI targetText;
 
     [Header("Profit")]
     [SerializeField, Min(0), Tooltip("Dollars per star")]
@@ -45,14 +57,17 @@ public class LaunchResults : MonoBehaviour
     private int             starBonusMax = 100;
     [SerializeField, Min(0), Tooltip("Profit needed to survive the day, unless Show is given a target (LevelManager raises it every day)")]
     private int             profitTarget = 10000;
-    [SerializeField, Tooltip("Optional: today's target, see targetFormat")]
-    private TextMeshProUGUI targetText;
     [SerializeField, Tooltip("How the target is written; {0} = the value")]
-    private string          targetFormat = "Target: ${0:N0}";
+    private string          targetFormat = "${0:N0}";
     [SerializeField, Tooltip("How the amount is written; {0} = the value")]
     private string          profitFormat = "${0:N0}";
-    [SerializeField] private Color lossColor = new Color(1.0f, 0.3f, 0.3f, 1.0f);
-    [SerializeField] private Color profitColor = new Color(0.3f, 1.0f, 0.3f, 1.0f);
+    [SerializeField, Tooltip("Color of the fill and the amount; left = no profit, right = profit of gradientRange x the target")]
+    private Gradient        profitGradient = DefaultGradient();
+    [SerializeField, Min(0.01f), Tooltip("Profit, as a multiple of the target, at the right end of the gradient (1 = the target; past it the color holds)")]
+    private float           gradientRange = 1.0f;
+    [SerializeField, Min(1), Tooltip("Scale of the target marker's pop when the profit passes it")]
+    private float           targetPopScale = 1.4f;
+    [SerializeField, Min(0)] private float targetPopTime = 0.25f;
 
     [Header("Timing")]
     [SerializeField, Min(0)] private float fadeTime = 0.4f;
@@ -84,19 +99,7 @@ public class LaunchResults : MonoBehaviour
         canvasGroup.interactable = false;
         canvasGroup.blocksRaycasts = false;
 
-        if ((profitText == null) && (titleText != null))
-        {
-            profitText = Instantiate(titleText, titleText.transform.parent);
-            profitText.name = "Profit";
-            profitText.transform.SetAsLastSibling();
-        }
-        if (profitText != null) profitText.alpha = 0.0f;
-
-        // The profit row (label plus amount) is not part of the layout until its turn
-        if ((profitRoot == null) && (profitText != null) && (profitText.transform.parent != transform))
-        {
-            profitRoot = profitText.transform.parent.gameObject;
-        }
+        // The profit row (label plus bar) is not part of the layout until its turn
         if (profitRoot != null) profitRoot.SetActive(false);
     }
 
@@ -132,8 +135,12 @@ public class LaunchResults : MonoBehaviour
 
         // Title alone
         if (titleText != null) titleText.alpha = 1.0f;
-        if (profitText != null) profitText.alpha = 0.0f;
         if (profitRoot != null) profitRoot.SetActive(false);
+        if (targetMarker != null)
+        {
+            targetMarker.Tween().Stop("TargetPop", Tweener.StopBehaviour.Cancel);
+            targetMarker.localScale = Vector3.one;
+        }
         canvasGroup.FadeIn(fadeTime);
         yield return new WaitForSeconds(fadeTime + titleHold);
 
@@ -161,30 +168,31 @@ public class LaunchResults : MonoBehaviour
         profit = 0;
         for (int i = 0; i < totalStars; i++) profit += starValue + UnityEngine.Random.Range(0, starBonusMax + 1);
 
-        if (profitText != null)
+        if (profitRoot != null)
         {
-            SetProfitText(0);
-            profitText.alpha = 1.0f;
-            if (profitRoot != null)
+            profitRoot.SetActive(true);
+            var group = profitRoot.GetComponent<CanvasGroup>();
+            if (group != null)
             {
-                profitRoot.SetActive(true);
-                var group = profitRoot.GetComponent<CanvasGroup>();
-                if (group != null)
-                {
-                    group.alpha = 0.0f;
-                    group.FadeIn(fadeTime);
-                }
+                group.alpha = 0.0f;
+                group.FadeIn(fadeTime);
             }
+        }
+        // The bar needs its laid out size before the markers are placed on it
+        LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)transform);
+        SetProfit(0);
 
-            float elapsed = 0.0f;
-            while (elapsed < profitDuration)
-            {
-                elapsed += Time.deltaTime;
-                float t = (profitDuration > 0.0f) ? Mathf.Clamp01(elapsed / profitDuration) : 1.0f;
-                SetProfitText(Mathf.RoundToInt(profit * t));
-                yield return null;
-            }
-            SetProfitText(profit);
+        float elapsed = 0.0f;
+        int shown = 0;
+        while (shown < profit)
+        {
+            elapsed += Time.deltaTime;
+            float t = (profitDuration > 0.0f) ? Mathf.Clamp01(elapsed / profitDuration) : 1.0f;
+            int value = Mathf.RoundToInt(profit * t);
+            if ((shown < profitTarget) && (value >= profitTarget)) PopTarget();
+            shown = value;
+            SetProfit(shown);
+            yield return null;
         }
 
         yield return new WaitForSeconds(endHold);
@@ -193,10 +201,69 @@ public class LaunchResults : MonoBehaviour
         onDone?.Invoke(success, profit);
     }
 
-    void SetProfitText(int value)
+    // Up to the target the bar is scaled to the target: the fill and the profit marker grow toward the target
+    // marker at the end. Past it the bar is scaled to the profit: full, profit marker at the end, target sliding back.
+    void SetProfit(int value)
     {
-        profitText.text = string.Format(profitFormat, value);
-        profitText.color = (value >= profitTarget) ? profitColor : lossColor;
+        float ratio = (profitTarget > 0) ? (float)value / profitTarget : 1.0f;
+        float profitPos = Mathf.Clamp01(ratio);
+        float targetPos = (ratio > 1.0f) ? (1.0f / ratio) : 1.0f;
+        Color color = profitGradient.Evaluate(Mathf.Clamp01(ratio / gradientRange));
+
+        if (profitFill != null)
+        {
+            profitFill.fillAmount = profitPos;
+            profitFill.color = color;
+        }
+        if (profitText != null)
+        {
+            profitText.text = string.Format(profitFormat, value);
+            profitText.color = color;
+        }
+        PlaceOnBar(profitMarker, profitPos);
+        PlaceOnBar(targetMarker, targetPos);
+    }
+
+    // Moves a marker horizontally to t along the fill's rect (0 = left end, 1 = right end); its y stays as authored
+    void PlaceOnBar(RectTransform marker, float t)
+    {
+        if ((marker == null) || (profitFill == null)) return;
+
+        RectTransform bar = profitFill.rectTransform;
+        Rect rect = bar.rect;
+        Vector3 world = bar.TransformPoint(new Vector3(Mathf.Lerp(rect.xMin, rect.xMax, t), rect.center.y, 0.0f));
+
+        Vector3 pos = marker.localPosition;
+        pos.x = marker.parent.InverseTransformPoint(world).x;
+        marker.localPosition = pos;
+    }
+
+    void PopTarget()
+    {
+        if ((targetMarker == null) || (targetPopTime <= 0.0f)) return;
+
+        Transform t = targetMarker;
+        t.Tween().Stop("TargetPop", Tweener.StopBehaviour.Cancel);
+        t.localScale = Vector3.one;
+        t.LocalScaleTo(Vector3.one * targetPopScale, targetPopTime * 0.5f, "TargetPop").Done(() =>
+        {
+            t.LocalScaleTo(Vector3.one, targetPopTime * 0.5f, "TargetPop");
+        });
+    }
+
+    // Red, through yellow, to green at the target
+    static Gradient DefaultGradient()
+    {
+        var gradient = new Gradient();
+        gradient.SetKeys(
+            new[]
+            {
+                new GradientColorKey(new Color(1.0f, 0.3f, 0.3f), 0.0f),
+                new GradientColorKey(new Color(1.0f, 0.85f, 0.2f), 0.75f),
+                new GradientColorKey(new Color(0.3f, 1.0f, 0.3f), 1.0f),
+            },
+            new[] { new GradientAlphaKey(1.0f, 0.0f), new GradientAlphaKey(1.0f, 1.0f) });
+        return gradient;
     }
 
     LaunchRow CreateRow(string label)
@@ -210,7 +277,7 @@ public class LaunchResults : MonoBehaviour
         LaunchRow row = Instantiate(rowPrefab, transform);
         row.name = $"Row {label}";
         if (rowsAfter != null) row.transform.SetSiblingIndex(rowsAfter.GetSiblingIndex() + 1 + rows.Count);
-        else if (profitText != null) row.transform.SetSiblingIndex(profitText.transform.GetSiblingIndex());
+        else if (profitRoot != null) row.transform.SetSiblingIndex(profitRoot.transform.GetSiblingIndex());
         row.Setup(label);
         rows.Add(row);
         return row;
