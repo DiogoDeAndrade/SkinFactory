@@ -16,6 +16,10 @@ public abstract class MinigameUI : MonoBehaviour
 
     protected bool isPromptRunning => promptCR != null;
 
+    // There is a prompt card and it hasn't been shown today (for a subclass running the card itself, see ConceptMG)
+    protected bool promptPending => (promptGroup != null) && !promptShown;
+    protected void MarkPromptShown() { promptShown = true; }
+
     protected virtual void Start()
     {
         canvasGroup = GetComponent<CanvasGroup>();
@@ -72,7 +76,7 @@ public abstract class MinigameUI : MonoBehaviour
         onDone?.Invoke();
     }
 
-    // Fade in, wait, fade out. Meant to be yielded from a subclass coroutine (see ConceptMG intro)
+    // Fade in, wait, fade out
     protected IEnumerator PromptCR()
     {
         if ((promptGroup == null) || promptShown) yield break;

@@ -172,6 +172,7 @@ public class ModellingMG : MinigameUI
         RefreshGraphic();
         UpdateUI();
         canvasGroup.FadeOut(0.1f);
+        if (LevelManager.instance != null) LevelManager.instance.ShowSkinProgress();
     }
 
 #if UNITY_EDITOR

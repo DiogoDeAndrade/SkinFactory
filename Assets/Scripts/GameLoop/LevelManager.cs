@@ -13,13 +13,15 @@ using UnityEngine.SceneManagement;
 //  2. Brainstorm: the timer runs; the player fills the pitch drop areas with ideas. Once all are full the boss
 //     judges the pitch (minMatchingIdeas of them must carry a requested tag). A rejected pitch has to be taken
 //     apart before it can be pitched again; after maxAttempts rejections the boss picks the concept himself
-//  3. Production: concept, modelling, painting, release
+//  3. Production: concept, modelling, painting, coding, marketing, release. After each station but marketing the
+//     camera cuts to the Skinotron for a moment (showcase) while the skin catches up with the player's progress
 //  4. Launch: the results screen scores each station in stars and turns them into profit; enough profit starts
 //     the next day, too little is game over. Timer out at any point = game over
-// The timer only runs while the player is working (brainstorm and production), never while the boss talks.
+// The timer only runs while the player is working (brainstorm and production), never while the boss talks or the
+// skin is on show.
 public class LevelManager : MonoBehaviour
 {
-    public enum State { Briefing, Brainstorm, Verdict, Production, Launch, GameOver }
+    public enum State { Briefing, Brainstorm, Verdict, Production, Showcase, Launch, GameOver }
 
     [Header("Boss")]
     [SerializeField, Tooltip("Camera framing the boss; its GameObject is switched on while he talks and off otherwise")]
@@ -37,6 +39,16 @@ public class LevelManager : MonoBehaviour
 
     [SerializeField, Min(0), Tooltip("Distance (XZ) from the boss anchor within which the boss repeats the request during the brainstorm")]
     private float               bossTalkRange = 2.5f;
+
+    [Header("Skinotron")]
+    [SerializeField, Tooltip("Camera framing the Skinotron; its GameObject is switched on while the skin's progress is shown. Without it the skin updates with no cut or pause")]
+    private Camera              skinCamera;
+    [SerializeField, Tooltip("Shows the skin as far as the player has got; found in the scene if left empty")]
+    private SkinDisplay         skinDisplay;
+    [SerializeField, Min(0), Tooltip("Seconds on the Skinotron before the skin changes")]
+    private float               showcaseLead = 0.5f;
+    [SerializeField, Min(0), Tooltip("Seconds on the Skinotron after the skin changes, before play resumes")]
+    private float               showcaseHold = 2.0f;
 
     [Header("Day transition")]
     [SerializeField, Min(0), Tooltip("Fullscreen wipe out / in around a day change (needs a FullscreenWiper in the scene)")]
@@ -164,10 +176,12 @@ public class LevelManager : MonoBehaviour
         machines = FindObjectsByType<IdeaMachine>();
         if (conceptStation == null) conceptStation = FindAnyObjectByType<ConceptMG>();
         if (playerCamera == null) playerCamera = FindAnyObjectByType<OrbitCameraController>();
+        if (skinDisplay == null) skinDisplay = FindAnyObjectByType<SkinDisplay>();
         if (bossAnchor == null) bossAnchor = transform;
 
         HideGameOver();
         SetBossCamera(false);
+        SetSkinCamera(false);
         StartCoroutine(FirstDayCR());
     }
 
@@ -245,6 +259,10 @@ public class LevelManager : MonoBehaviour
         }
         SetDayConcept(null);
         ClearPitch();
+
+        // An empty Skinotron, or whatever a debug starting stage already carries
+        SetSkinCamera(false);
+        if (skinDisplay != null) skinDisplay.ShowProgress(player);
 
         PickRequest();
 
@@ -345,6 +363,40 @@ public class LevelManager : MonoBehaviour
         else if (concept != null) Debug.LogWarning("LevelManager: no ConceptMG in the scene to receive the day's concept", this);
 
         if (concept != null) onConceptChosen?.Invoke(concept);
+    }
+
+    // Called by a station once its work is handed to the player: cut to the Skinotron with the clock stopped and the
+    // controls off, the skin catches up with the player's progress, then back to work. Outside production (or with
+    // no camera for the cut) the skin just updates.
+    public void ShowSkinProgress()
+    {
+        if (skinDisplay == null) skinDisplay = FindAnyObjectByType<SkinDisplay>();
+
+        if ((state != State.Production) || (skinCamera == null))
+        {
+            if (skinCamera == null) Debug.LogWarning("LevelManager: no skin camera assigned, the skin updates without a cut", this);
+            if (skinDisplay != null) skinDisplay.ShowProgress(player);
+            return;
+        }
+
+        flowCR = StartCoroutine(ShowcaseCR());
+    }
+
+    IEnumerator ShowcaseCR()
+    {
+        state = State.Showcase;
+        HideReminder();
+        if (player != null) player.LockControls(true);
+        SetSkinCamera(true);
+        yield return new WaitForSeconds(showcaseLead);
+
+        if (skinDisplay != null) skinDisplay.ShowProgress(player);
+        yield return new WaitForSeconds(showcaseHold);
+
+        SetSkinCamera(false);
+        if (player != null) player.LockControls(false);
+        state = State.Production;
+        flowCR = null;
     }
 
     // Called by the release station once a painting exists. Success is just completion for now.
@@ -464,6 +516,7 @@ public class LevelManager : MonoBehaviour
         state = State.GameOver;
         timeLeft = 0.0f;
         UpdateTimerText();
+        SetSkinCamera(false);
         onGameOver?.Invoke(reason);
 
         flowCR = StartCoroutine(GameOverCR(reason));
@@ -579,6 +632,11 @@ public class LevelManager : MonoBehaviour
             return;
         }
         if (bossCamera.gameObject.activeSelf != on) bossCamera.gameObject.SetActive(on);
+    }
+
+    void SetSkinCamera(bool on)
+    {
+        if ((skinCamera != null) && (skinCamera.gameObject.activeSelf != on)) skinCamera.gameObject.SetActive(on);
     }
 
     #endregion

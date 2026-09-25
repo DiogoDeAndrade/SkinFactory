@@ -16,10 +16,6 @@ public class Player : MonoBehaviour
     // Station the player is currently working at (null when walking around)
     public Minigame activeMinigame => currentMinigame;
 
-    [Header("Skin")]
-    [SerializeField, Tooltip("Where the voxel-extruded skin is built once a painting exists")]
-    private VoxelSkin   skin;
-
     [Header("Interaction")]
     [SerializeField, Min(0), Tooltip("Distance (XZ) within which an idea is highlighted and can be grabbed")]
     private float       pickRange = 1.5f;
@@ -107,10 +103,6 @@ public class Player : MonoBehaviour
         if ((this.painting != null) && (this.painting != painting)) Destroy(this.painting);
 
         this.painting = painting;
-
-        if (skin == null) skin = FindAnyObjectByType<VoxelSkin>();
-        if (skin != null) skin.Build(painting);
-        else Debug.LogWarning("Player: no VoxelSkin in the scene, the skin was not built", this);
     }
 
     // Moves the player to a point (new day), through the rigidbody so physics does not drag it back
@@ -129,7 +121,7 @@ public class Player : MonoBehaviour
         transform.SetPositionAndRotation(point.position, point.rotation);
     }
 
-    // Drops everything carried (new day): drawing, model, painting and the built skin
+    // Drops everything carried (new day): drawing, model and painting
     public void ResetPipeline()
     {
         if (conceptDrawing != null) Destroy(conceptDrawing);
@@ -144,8 +136,6 @@ public class Player : MonoBehaviour
         paintingScore = -1.0f;
         codingAccuracy = -1.0f;
         marketingStars = -1;
-        if (skin == null) skin = FindAnyObjectByType<VoxelSkin>();
-        if (skin != null) skin.Clear();
     }
 
     public void SetConceptDrawing(Texture2D drawing, ConceptSO source)

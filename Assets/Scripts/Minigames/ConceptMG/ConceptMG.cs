@@ -158,27 +158,49 @@ public class ConceptMG : MinigameUI
 
         yield return new WaitForSeconds(conceptDisplayTime);
 
-        float t = 0.0f;
-        while (t < crossfadeTime)
+        if (promptPending)
         {
-            t += Time.deltaTime;
-            float a = Mathf.Clamp01(t / crossfadeTime);
-            SetAlpha(conceptImage, 1.0f - a);
-            SetAlpha(sketchImage, a);
-            SetAlpha(drawImage, a);
-            yield return null;
+            // Concept, then the "Draw" card (first time only), then the sketch, each crossfading into the next
+            yield return CrossfadeCR(a =>
+            {
+                SetAlpha(conceptImage, 1.0f - a);
+                promptGroup.alpha = a;
+            });
+            yield return new WaitForSeconds(promptDisplayTime);
+            yield return CrossfadeCR(a =>
+            {
+                promptGroup.alpha = 1.0f - a;
+                SetAlpha(sketchImage, a);
+                SetAlpha(drawImage, a);
+            });
+            MarkPromptShown();
         }
-
-        SetAlpha(conceptImage, 0.0f);
-        SetAlpha(sketchImage, 1.0f);
-        SetAlpha(drawImage, 1.0f);
-
-        // "Draw" card, first time only
-        yield return PromptCR();
+        else
+        {
+            yield return CrossfadeCR(a =>
+            {
+                SetAlpha(conceptImage, 1.0f - a);
+                SetAlpha(sketchImage, a);
+                SetAlpha(drawImage, a);
+            });
+        }
 
         introDone = true;
         drawingEnabled = true;
         introCR = null;
+    }
+
+    // Calls apply with 0 to 1 over crossfadeTime, ending on exactly 1
+    IEnumerator CrossfadeCR(System.Action<float> apply)
+    {
+        float t = 0.0f;
+        while (t < crossfadeTime)
+        {
+            t += Time.deltaTime;
+            apply(Mathf.Clamp01(t / crossfadeTime));
+            yield return null;
+        }
+        apply(1.0f);
     }
 
     void Update()
@@ -481,6 +503,7 @@ public class ConceptMG : MinigameUI
 #endif
 
         canvasGroup.FadeOut(0.1f);
+        if (LevelManager.instance != null) LevelManager.instance.ShowSkinProgress();
     }
 
 #if UNITY_EDITOR

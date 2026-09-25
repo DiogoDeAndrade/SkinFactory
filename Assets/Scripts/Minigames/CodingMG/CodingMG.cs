@@ -316,6 +316,7 @@ public class CodingMG : MinigameUI
 
         UpdateUI();
         canvasGroup.FadeOut(0.1f);
+        if (LevelManager.instance != null) LevelManager.instance.ShowSkinProgress();
     }
 
     // Over the whole snippet, so it is also what the player gets if the time ran out right now

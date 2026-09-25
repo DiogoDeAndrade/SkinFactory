@@ -37,9 +37,9 @@ Next release, for the [Game Creators Club](https://game-creators-club.itch.io/):
 2. ~~Prompts before each minigame starts ("Draw", "Model", "Paint", "Code", "Remove bad reviews"), with an
    icon explaining what to use (keyboard, mouse)~~ (done)
 3. ~~Show the money goal in some way, so the player sees it increasing with time~~ (done)
-4. Progressive build of the skin: the model appears first as just lines, then as polygons, then with the
-   actual painting, with a cutscene showing it
-5. Build a voxel model in the sketch phase, but then use the extruded polygon outlines and texturing
+4. ~~Progressive build of the skin: the model appears first as just lines, then as polygons, then with the
+   actual painting, with a cutscene showing it~~ (done)
+5. ~~Build a voxel model in the sketch phase, but then use the extruded polygon outlines and texturing~~ (done)
 6. Improved painting minigame: paint with a brush, choosing brush size and pattern as well as color, to make
    it more fun. The game scores how well you painted: how much of the area inside the regions you actually
    covered, minus how much you painted outside them
