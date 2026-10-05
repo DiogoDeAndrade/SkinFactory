@@ -25,6 +25,12 @@ public class LaunchRow : MonoBehaviour
     [SerializeField, Min(1)] private float popScale = 1.4f;
     [SerializeField, Min(0)] private float popTime = 0.25f;
 
+    [Header("Sounds")]
+    [SerializeField] private SoundDef   starGainedSound;    // A star lights up
+    [SerializeField, Min(0), Tooltip("Pitch added per star along the row, so a run of stars climbs")]
+    private float                       starPitchStep = 0.1f;
+    [SerializeField] private SoundDef   starLostSound;      // A live meter drops a star
+
     public int starCount => stars.Count;
 
     enum Mode { Tint, ToggleSelf, ToggleChild }
@@ -77,6 +83,7 @@ public class LaunchRow : MonoBehaviour
 
         count = Mathf.Clamp(count, 0, stars.Count);
         bool first = litCount < 0;
+        if (!first && (count < litCount)) starLostSound?.Play();
 
         for (int i = 0; i < stars.Count; i++)
         {
@@ -124,6 +131,8 @@ public class LaunchRow : MonoBehaviour
                 star.color = (index < ownColors.Count) ? ownColors[index] : Color.white;
                 break;
         }
+
+        starGainedSound?.Play(1.0f, 1.0f + index * starPitchStep);
 
         if (popTime <= 0.0f) return;
         Transform t = star.transform;

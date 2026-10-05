@@ -25,6 +25,8 @@ public partial class DropArea : MonoBehaviour
     private float           punchScale = 1.2f;
     [SerializeField, Min(0), Tooltip("Seconds for the scale punch (there and back)")]
     private float           punchTime = 0.2f;
+    [SerializeField, Tooltip("Played when something is dropped here: an idea placed in a pitch slot, or thrown in the trash")]
+    private SoundDef        dropSound;
 
     public bool     IsTrash => trash;
     public IdeaLibrarySO Library => ideaLibrary;
@@ -125,9 +127,11 @@ public partial class DropArea : MonoBehaviour
         current = null;
     }
 
-    // Small scale punch for feedback
+    // Feedback for a drop: the sound and a small scale punch
     public void Punch()
     {
+        dropSound?.Play();
+
         if ((punchTime <= 0.0f) || Mathf.Approximately(punchScale, 1.0f)) return;
 
         transform.Tween().Stop("DropAreaPunch", Tweener.StopBehaviour.Cancel);

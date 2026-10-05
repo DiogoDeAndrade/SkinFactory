@@ -48,6 +48,8 @@ public class SkinDisplay : MonoBehaviour
     [SerializeField, Min(1), Tooltip("Scale of the pop when only the texture changes")]
     private float                           popScale = 1.2f;
     [SerializeField, Min(0)] private float  popTime = 0.3f;
+    [SerializeField, Tooltip("Played when the skin grows in or pops with a new texture")]
+    private SoundDef                        appearSound;
 
     [Header("Rendering")]
     [SerializeField, Tooltip("Material template; instanced with the skin's texture as base map. Falls back to URP Lit.")]
@@ -166,6 +168,8 @@ public class SkinDisplay : MonoBehaviour
 
     void GrowIn()
     {
+        appearSound?.Play();
+
         Transform t = skinObject.transform;
         t.Tween().Stop("SkinAppear", Tweener.StopBehaviour.Cancel);
         if (growTime <= 0.0f)
@@ -179,6 +183,8 @@ public class SkinDisplay : MonoBehaviour
 
     void Pop()
     {
+        appearSound?.Play();
+
         Transform t = skinObject.transform;
         t.Tween().Stop("SkinAppear", Tweener.StopBehaviour.Cancel);
         t.localScale = Vector3.one;

@@ -114,6 +114,22 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private CanvasGroup        gameOverPanel;  // Shown on game over; wire its Retry button to Retry()
     [SerializeField] private TextMeshProUGUI    gameOverText;   // Optional, reason
 
+    [Header("Sounds")]
+    [SerializeField] private SoundDef   intercomSound;          // The boss camera comes on
+    [SerializeField, Tooltip("Voice blip repeated while the boss talks; give the SoundDef several clips or a pitch range for variety")]
+    private SoundDef                    bossTalkSound;
+    [SerializeField] private SoundDef   pitchAcceptedSound;     // With the boss's verdict line
+    [SerializeField] private SoundDef   pitchRejectedSound;     // Same, when the pitch is rubbish (also when he gives up and picks himself)
+    [SerializeField] private SoundDef   skinotronSound;         // The camera cuts to the Skinotron
+    [SerializeField] private SoundDef   dayWipeSound;           // The wipe into the next day
+    [SerializeField, Tooltip("Ticks once a second through the last seconds of the day")]
+    private SoundDef                    clockWarningSound;
+    [SerializeField, Min(0), Tooltip("Seconds left in the day when the clock warning starts")]
+    private float                       clockWarningTime = 10.0f;
+    [SerializeField, Tooltip("Game over, as the panel comes up. Followed by the tail sound: plays only when both are assigned")]
+    private SoundDef                    firedSound;
+    [SerializeField] private SoundDef   firedTailSound;
+
     [Header("Events")]
     public UnityEvent<int>          onDayStarted;       // Day number
     public UnityEvent               onPitchAccepted;
@@ -198,7 +214,9 @@ public class LevelManager : MonoBehaviour
 
         if (timerRunning)
         {
+            float before = timeLeft;
             timeLeft = Mathf.Max(0.0f, timeLeft - Time.deltaTime);
+            GameSounds.ClockWarning(clockWarningSound, before, timeLeft, clockWarningTime);
             UpdateTimerText();
 
             if (timeLeft <= 0.0f)
@@ -321,7 +339,7 @@ public class LevelManager : MonoBehaviour
             ConceptSO concept = PickConcept();
             if (player != null) player.SetBrainstormStars(BrainstormStars(matching));
             onPitchAccepted?.Invoke();
-            yield return BossSaysCR(think, string.Format(pivotLine, ConceptName(concept)));
+            yield return BossSpeechCR(true, pitchAcceptedSound, think, string.Format(pivotLine, ConceptName(concept)));
             StartProduction(concept);
         }
         else
@@ -334,12 +352,12 @@ public class LevelManager : MonoBehaviour
                 // The pitch never landed: one star
                 ConceptSO concept = PickConcept();
                 if (player != null) player.SetBrainstormStars(1);
-                yield return BossSaysCR(think, string.Format(giveUpLine, ConceptName(concept)));
+                yield return BossSpeechCR(true, pitchRejectedSound, think, string.Format(giveUpLine, ConceptName(concept)));
                 StartProduction(concept);
             }
             else
             {
-                yield return BossSaysCR(think, rejectLine);
+                yield return BossSpeechCR(true, pitchRejectedSound, think, rejectLine);
                 state = State.Brainstorm;
             }
         }
@@ -388,6 +406,7 @@ public class LevelManager : MonoBehaviour
         HideReminder();
         if (player != null) player.LockControls(true);
         SetSkinCamera(true);
+        skinotronSound?.Play();
         yield return new WaitForSeconds(showcaseLead);
 
         if (skinDisplay != null) skinDisplay.ShowProgress(player);
@@ -485,6 +504,7 @@ public class LevelManager : MonoBehaviour
         if (player != null) player.LockControls(true);
 
         bool covered = false;
+        dayWipeSound?.Play();
         FullscreenWiper.WipeOut(dayWipeTime, dayWipeType, () => covered = true);
         while (!covered) yield return null;
 
@@ -527,9 +547,10 @@ public class LevelManager : MonoBehaviour
         if (player != null) player.LockControls(true);
 
         // The camera stays on the boss behind the panel
-        yield return BossSpeechCR(false, firedLine);
+        yield return BossSpeechCR(false, null, firedLine);
 
         Time.timeScale = 0.0f;
+        GameSounds.PlayChain(this, firedSound, firedTailSound);
 
         if (gameOverText) gameOverText.text = reason;
         if (gameOverPanel)
@@ -561,7 +582,9 @@ public class LevelManager : MonoBehaviour
 
         if (near && (reminderBalloon == null))
         {
-            reminderBalloon = SpeechBalloonManager.Show(RequestText(), bossAnchor, bossBalloonOffset);
+            string text = RequestText();
+            reminderBalloon = SpeechBalloonManager.Show(text, bossAnchor, bossBalloonOffset);
+            StartCoroutine(GameSounds.BabbleCR(bossTalkSound, text));
         }
         else if (!near)
         {
@@ -579,23 +602,29 @@ public class LevelManager : MonoBehaviour
     string RequestText() => string.Format(requestLine, JoinTags(requested));
 
     // Camera on, each line up for its reading time (a gap between them), camera off. Empty lines are skipped.
-    IEnumerator BossSaysCR(params string[] lines) => BossSpeechCR(true, lines);
+    IEnumerator BossSaysCR(params string[] lines) => BossSpeechCR(true, null, lines);
 
-    // Same, with the choice of leaving the camera on the boss afterwards
-    IEnumerator BossSpeechCR(bool cameraOffAfter, params string[] lines)
+    // Same, with the choice of leaving the camera on the boss afterwards, and of a sound to go with the last line
+    // (the verdict, after the line where he reads the pitch back)
+    IEnumerator BossSpeechCR(bool cameraOffAfter, SoundDef lastLineSound, params string[] lines)
     {
         HideReminder();
         SetBossCamera(true);
+        intercomSound?.Play();
         yield return new WaitForSeconds(bossPause);
 
+        int last = System.Array.FindLastIndex(lines, l => !string.IsNullOrWhiteSpace(l));
         bool first = true;
-        foreach (var line in lines)
+        for (int i = 0; i < lines.Length; i++)
         {
+            string line = lines[i];
             if (string.IsNullOrWhiteSpace(line)) continue;
             if (!first) yield return new WaitForSeconds(lineGap);
             first = false;
 
             SpeechBalloon balloon = SpeechBalloonManager.Show(line, bossAnchor, bossBalloonOffset);
+            if (i == last) lastLineSound?.Play();
+            StartCoroutine(GameSounds.BabbleCR(bossTalkSound, line));
             float talkTime = (balloon != null) ? balloon.ReadTime : fallbackTalkTime;
             yield return new WaitForSeconds(talkTime);
             if (balloon != null) balloon.Hide();

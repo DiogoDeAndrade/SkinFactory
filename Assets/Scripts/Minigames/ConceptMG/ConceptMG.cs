@@ -156,11 +156,15 @@ public class ConceptMG : MinigameUI
         SetAlpha(sketchImage, 0.0f);
         SetAlpha(drawImage, 0.0f);
 
+        // The card only comes after the concept art here, so the station still opens with its own sound
+        if (promptPending) openSound?.Play();
+
         yield return new WaitForSeconds(conceptDisplayTime);
 
         if (promptPending)
         {
             // Concept, then the "Draw" card (first time only), then the sketch, each crossfading into the next
+            promptSound?.Play();
             yield return CrossfadeCR(a =>
             {
                 SetAlpha(conceptImage, 1.0f - a);
@@ -502,6 +506,7 @@ public class ConceptMG : MinigameUI
         if (saveDrawingOnSubmit) SaveDrawingPNG();
 #endif
 
+        submitSound?.Play();
         canvasGroup.FadeOut(0.1f);
         if (LevelManager.instance != null) LevelManager.instance.ShowSkinProgress();
     }

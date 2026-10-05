@@ -84,6 +84,17 @@ public class LaunchResults : MonoBehaviour
     [SerializeField, Min(0), Tooltip("Everything shown, before the outcome is reported")]
     private float           endHold = 1.5f;
 
+    [Header("Sounds")]
+    [SerializeField, Tooltip("Repeated while the profit counts up, its pitch rising with the amount")]
+    private SoundDef        profitTickSound;
+    [SerializeField, Min(0.01f), Tooltip("Seconds between two profit ticks")]
+    private float           profitTickInterval = 0.06f;
+    [SerializeField, Min(1), Tooltip("Pitch of the last profit tick (the first plays at 1)")]
+    private float           profitTickMaxPitch = 1.6f;
+    [SerializeField] private SoundDef targetPassedSound;    // The profit passes the target
+    [SerializeField] private SoundDef dayWonSound;          // The count ends at or over the target
+    [SerializeField] private SoundDef dayLostSound;         // The count ends short of it
+
     public bool     isShowing { get; private set; }
     public int      profit { get; private set; }
     public bool     success => profit >= profitTarget;
@@ -183,6 +194,7 @@ public class LaunchResults : MonoBehaviour
         SetProfit(0);
 
         float elapsed = 0.0f;
+        float tickLeft = 0.0f;
         int shown = 0;
         while (shown < profit)
         {
@@ -192,8 +204,18 @@ public class LaunchResults : MonoBehaviour
             if ((shown < profitTarget) && (value >= profitTarget)) PopTarget();
             shown = value;
             SetProfit(shown);
+
+            tickLeft -= Time.deltaTime;
+            if (tickLeft <= 0.0f)
+            {
+                profitTickSound?.Play(1.0f, Mathf.Lerp(1.0f, profitTickMaxPitch, t));
+                tickLeft = profitTickInterval;
+            }
             yield return null;
         }
+
+        if (success) dayWonSound?.Play();
+        else dayLostSound?.Play();
 
         yield return new WaitForSeconds(endHold);
 
@@ -240,6 +262,8 @@ public class LaunchResults : MonoBehaviour
 
     void PopTarget()
     {
+        targetPassedSound?.Play();
+
         if ((targetMarker == null) || (targetPopTime <= 0.0f)) return;
 
         Transform t = targetMarker;

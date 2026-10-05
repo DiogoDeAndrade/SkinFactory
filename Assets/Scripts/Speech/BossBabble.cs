@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UC;
 using UnityEngine;
 
 // Attach to the boss on the main menu: he keeps saying business things, one balloon after another, forever.
@@ -27,6 +28,10 @@ public class BossBabble : MonoBehaviour
     private float       extraHold = 0.5f;
     [SerializeField, Min(0), Tooltip("Seconds a line stays up when there is no balloon system to time it")]
     private float       fallbackTalkTime = 3.0f;
+
+    [Header("Sounds")]
+    [SerializeField, Tooltip("Voice blip repeated while a line is up; give the SoundDef several clips or a pitch range for variety")]
+    private SoundDef    talkSound;
 
     List<string>    lines = new List<string>();
     SpeechBalloon   balloon;
@@ -71,6 +76,7 @@ public class BossBabble : MonoBehaviour
         {
             string line = Pick();
             balloon = SpeechBalloonManager.Show(line, anchor, balloonOffset);
+            StartCoroutine(GameSounds.BabbleCR(talkSound, line));
             float talkTime = ((balloon != null) ? balloon.ReadTime : fallbackTalkTime) + extraHold;
             yield return new WaitForSeconds(talkTime);
 

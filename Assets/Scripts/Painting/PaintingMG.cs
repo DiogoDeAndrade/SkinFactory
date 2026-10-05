@@ -73,6 +73,16 @@ public class PaintingMG : MinigameUI
     [SerializeField, Tooltip("The painting handed to the player has every area filled with the color it took (unpainted areas left empty); off = the brush strokes as painted")]
     private bool                                exportAreaColors = true;
 
+    [Header("Station sounds")]
+    [SerializeField] private SoundDef           selectSound;        // A color or a brush picked
+    [SerializeField] private SoundDef           areaClaimedSound;   // An area passes the threshold and takes its color
+    [SerializeField, Tooltip("Ticks once a second through the last seconds of the time limit")]
+    private SoundDef                            clockWarningSound;
+    [SerializeField, Min(0), Tooltip("Seconds left when the clock warning starts")]
+    private float                               clockWarningTime = 5.0f;
+    [SerializeField, Tooltip("The time ran out (instead of the submit sound)")]
+    private SoundDef                            timeUpSound;
+
 #if UNITY_EDITOR
     [Header("Debug (editor only)")]
     [SerializeField] private bool               savePaintingOnSubmit = false;             // Writes the painting as a PNG on submit
@@ -212,6 +222,12 @@ public class PaintingMG : MinigameUI
 
     public void Submit()
     {
+        Finish(false);
+    }
+
+    // Hands the painting in, whether the player submitted or the time ran out
+    void Finish(bool timedOut)
+    {
         if (paintDone) return;
 
         StopPainting();
@@ -234,6 +250,8 @@ public class PaintingMG : MinigameUI
         }
 
         UpdateUI();
+        if (timedOut) timeUpSound?.Play();
+        else submitSound?.Play();
         canvasGroup.FadeOut(0.1f);
         if (LevelManager.instance != null) LevelManager.instance.ShowSkinProgress();
     }
@@ -315,15 +333,18 @@ public class PaintingMG : MinigameUI
             int prevStars = stars, prevRegions = paintedRegions, prevColors = usedColors;
             Evaluate();
             if ((stars != prevStars) || (paintedRegions != prevRegions) || (usedColors != prevColors)) UpdateUI();
+            if (paintedRegions > prevRegions) areaClaimedSound?.Play();
         }
 
         // The clock only runs while painting; out of time, whatever is on the canvas is submitted.
         // No time at all (base and per area both zero) means no limit.
         if (timeLimit <= 0.0f) return;
 
+        float before = timeLeft;
         timeLeft = Mathf.Max(0.0f, timeLeft - Time.deltaTime);
+        GameSounds.ClockWarning(clockWarningSound, before, timeLeft, clockWarningTime);
         UpdateTimeFill();
-        if (timeLeft <= 0.0f) Submit();
+        if (timeLeft <= 0.0f) Finish(true);
     }
 
     #region Model and regions
@@ -895,7 +916,7 @@ public class PaintingMG : MinigameUI
             if (image == null) image = swatch.GetComponent<Image>();
             if (image) image.color = entry.color;
 
-            swatch.onClick.AddListener(() => SelectColor(index));
+            swatch.onClick.AddListener(() => { SelectColor(index); selectSound?.Play(); });
             swatches.Add(swatch);
         }
 
@@ -910,7 +931,7 @@ public class PaintingMG : MinigameUI
             for (int i = 0; i < brushButtons.Length; i++)
             {
                 int index = i;
-                if (brushButtons[i]) brushButtons[i].onClick.AddListener(() => SelectBrush(index));
+                if (brushButtons[i]) brushButtons[i].onClick.AddListener(() => { SelectBrush(index); selectSound?.Play(); });
             }
         }
 

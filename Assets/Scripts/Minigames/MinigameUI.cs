@@ -9,6 +9,11 @@ public abstract class MinigameUI : MonoBehaviour
     [SerializeField] protected float        promptFadeTime = 0.25f;
     [SerializeField] protected float        promptDisplayTime = 1.5f;
 
+    [Header("Sounds")]
+    [SerializeField] protected SoundDef     openSound;      // The panel comes up as the player stops at the station
+    [SerializeField] protected SoundDef     promptSound;    // The prompt card appears (instead of the open sound, that time)
+    [SerializeField] protected SoundDef     submitSound;    // The work is handed in
+
     protected CanvasGroup canvasGroup;
 
     bool        promptShown;    // Only the first time the minigame runs each day (cleared by ResetStation / ResetPrompt)
@@ -31,6 +36,9 @@ public abstract class MinigameUI : MonoBehaviour
     public virtual void Activate()
     {
         canvasGroup.FadeIn(0.15f);
+
+        // With the prompt card still to come, its sound is the one that opens the station
+        if (!promptPending) openSound?.Play();
     }
 
     public virtual void Deactivate()
@@ -83,6 +91,7 @@ public abstract class MinigameUI : MonoBehaviour
 
         promptGroup.alpha = 0.0f;
         promptGroup.FadeIn(promptFadeTime);
+        promptSound?.Play();
         yield return new WaitForSeconds(promptFadeTime + promptDisplayTime);
 
         promptGroup.FadeOut(promptFadeTime);

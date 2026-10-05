@@ -33,6 +33,10 @@ public class IdeaMachine : MonoBehaviour
     [SerializeField] private Color highlightColor = new Color(1.0f, 0.85f, 0.2f, 1.0f);
     [SerializeField, Min(0)] private float highlightWidth = 3.0f;
 
+    [Header("Sounds")]
+    [SerializeField, Tooltip("A new idea comes out (not the one already there when the scene starts)")]
+    private SoundDef        ideaOutSound;
+
     public Idea             CurrentIdea => current;
 
     Idea            current;
@@ -51,7 +55,7 @@ public class IdeaMachine : MonoBehaviour
         }
         outline.enabled = false;
 
-        if (spawnOnStart) Spawn();
+        if (spawnOnStart) Spawn(true);
         else delayLeft = spawnDelay;
     }
 
@@ -76,6 +80,11 @@ public class IdeaMachine : MonoBehaviour
 
     // Spawns the next idea immediately, replacing any current one
     public void Spawn()
+    {
+        Spawn(false);
+    }
+
+    void Spawn(bool silent)
     {
         if (current != null) Destroy(current.gameObject);
         current = null;
@@ -105,6 +114,8 @@ public class IdeaMachine : MonoBehaviour
         current.name = $"{ideaPrefab.name} ({so.name})";
         current.Setup(so);
         current.Launch(origin.position, endPoint.position, travelTime);
+
+        if (!silent) ideaOutSound?.Play();
     }
 
     // Without replacement: refills the bag from the idea list once it runs dry

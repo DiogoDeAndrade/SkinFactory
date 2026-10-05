@@ -25,6 +25,8 @@ public class Player : MonoBehaviour
     private UC.InputControl interactInput;
     [SerializeField, Tooltip("Where a grabbed idea is parented (on top of the player)")]
     private Transform   holdPoint;
+    [SerializeField, Tooltip("Played when an idea is picked up")]
+    private SoundDef    grabSound;
 
     public bool needNewInputSystem => (interactInput != null) && (interactInput.type == UC.InputControl.InputType.NewInput);
 
@@ -260,6 +262,7 @@ public class Player : MonoBehaviour
 
         heldIdea = idea;
         heldIdea.Grab(holdPoint);
+        grabSound?.Play();
 
         if (nearbyIdea == idea) nearbyIdea = null;
     }

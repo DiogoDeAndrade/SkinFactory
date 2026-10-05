@@ -29,6 +29,12 @@ public class ModellingMG : MinigameUI
     [SerializeField, Min(0)] private float      distanceThreshold = 2.0f;   // In drawing pixels
     [SerializeField, Range(0, 1)] private float minScoreToSubmit = 0.3f;
 
+    [Header("Station sounds")]
+    [SerializeField] private SoundDef           vertexSound;            // A vertex placed
+    [SerializeField] private SoundDef           polygonClosedSound;     // Back on the first vertex: the polygon is done
+    [SerializeField] private SoundDef           polygonRemovedSound;    // Polygon in progress cancelled, or a finished one deleted
+    [SerializeField] private SoundDef           deniedSound;            // No segments left in the budget
+
 #if UNITY_EDITOR
     [Header("Debug (editor only)")]
     [SerializeField] private bool               saveModelOnSubmit = false;              // Writes a ModelDataSO (plus the drawing PNG) on submit
@@ -171,6 +177,7 @@ public class ModellingMG : MinigameUI
 
         RefreshGraphic();
         UpdateUI();
+        submitSound?.Play();
         canvasGroup.FadeOut(0.1f);
         if (LevelManager.instance != null) LevelManager.instance.ShowSkinProgress();
     }
@@ -265,9 +272,14 @@ public class ModellingMG : MinigameUI
         if ((current.Count > 0) && IsNear(n, current[current.Count - 1], minVertexDistance)) return;
 
         // A new polygon needs room for at least a triangle; a new vertex adds one segment
-        if (ExceedsBudget((current.Count == 0) ? 3 : 1)) return;
+        if (ExceedsBudget((current.Count == 0) ? 3 : 1))
+        {
+            deniedSound?.Play();
+            return;
+        }
 
         current.Add(n);
+        vertexSound?.Play();
         RefreshGraphic();
         UpdateUI();
     }
@@ -275,10 +287,15 @@ public class ModellingMG : MinigameUI
     void ClosePolygon()
     {
         if (current.Count < 3) return;
-        if (ExceedsBudget(1)) return;   // The closing segment
+        if (ExceedsBudget(1))   // The closing segment
+        {
+            deniedSound?.Play();
+            return;
+        }
 
         polygons.Add(new List<Vector2>(current));
         current.Clear();
+        polygonClosedSound?.Play();
         RecomputeScore();
         RefreshGraphic();
         UpdateUI();
@@ -287,6 +304,7 @@ public class ModellingMG : MinigameUI
     void CancelPolygon()
     {
         current.Clear();
+        polygonRemovedSound?.Play();
         RefreshGraphic();
         UpdateUI();
     }
@@ -299,6 +317,7 @@ public class ModellingMG : MinigameUI
             if (PointInPolygon(polygons[i], n))
             {
                 polygons.RemoveAt(i);
+                polygonRemovedSound?.Play();
                 RecomputeScore();
                 RefreshGraphic();
                 UpdateUI();

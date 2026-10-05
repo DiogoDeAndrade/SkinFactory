@@ -57,6 +57,12 @@ public class MarketingMG : MinigameUI
     [SerializeField, Tooltip("Negative posts, one per line")]
     private TextAsset   negativeFile;
 
+    [Header("Station sounds")]
+    [SerializeField] private SoundDef   waveInSound;        // A new wave of posts appears
+    [SerializeField] private SoundDef   waveOutSound;       // The wave's time is up and the survivors vanish
+    [SerializeField] private SoundDef   postDeletedSound;   // A negative post removed
+    [SerializeField] private SoundDef   wrongPostSound;     // A positive post removed by mistake
+
     public int  stars => currentStars;
     public int  processed => processedCount;
     public bool isDone => marketingDone;
@@ -187,6 +193,7 @@ public class MarketingMG : MinigameUI
             posts.Add(post);
         }
 
+        waveInSound?.Play();
         RefreshRating();
         UpdateUI();
     }
@@ -194,6 +201,7 @@ public class MarketingMG : MinigameUI
     // Survivors vanish; the rating shown stays as it was until the next wave replaces it
     void EndWave()
     {
+        waveOutSound?.Play();
         ClearPosts(vanishTime);
     }
 
@@ -252,6 +260,8 @@ public class MarketingMG : MinigameUI
         if (!running || marketingDone || (post == null) || !post.isAlive) return;
 
         post.Kill(!post.isNegative);
+        if (post.isNegative) postDeletedSound?.Play();
+        else wrongPostSound?.Play();
         posts.Remove(post);
         processedCount++;
 
@@ -289,6 +299,7 @@ public class MarketingMG : MinigameUI
         else Debug.LogWarning("MarketingMG: no Player found to store the marketing result", this);
 
         UpdateUI();
+        submitSound?.Play();
         canvasGroup.FadeOut(0.1f);
     }
 

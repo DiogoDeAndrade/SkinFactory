@@ -70,6 +70,17 @@ public class CodingMG : MinigameUI
     [SerializeField, Min(0)] private float backspaceRepeatDelay = 0.4f;
     [SerializeField, Min(0)] private float backspaceRepeatRate = 0.04f;
 
+    [Header("Station sounds")]
+    [SerializeField] private SoundDef   keyRightSound;      // A right character typed
+    [SerializeField] private SoundDef   keyWrongSound;      // A wrong one
+    [SerializeField] private SoundDef   backspaceSound;
+    [SerializeField, Tooltip("Ticks once a second through the last seconds of the time limit")]
+    private SoundDef                    clockWarningSound;
+    [SerializeField, Min(0), Tooltip("Seconds left when the clock warning starts")]
+    private float                       clockWarningTime = 5.0f;
+    [SerializeField, Tooltip("The time ran out (instead of the submit sound)")]
+    private SoundDef                    timeUpSound;
+
     // Score in [0,1] over the whole snippet: right characters 1, wrong -wrongPenalty, untyped 0
     public float    accuracy => ComputeScore();
     public int      stars => LaunchResults.StarsFor(accuracy);
@@ -197,11 +208,13 @@ public class CodingMG : MinigameUI
         if (textDirty) UpdateUI();
 
         // The clock only runs while typing; out of time, whatever is on screen is submitted
+        float before = timeLeft;
         timeLeft = Mathf.Max(0.0f, timeLeft - Time.deltaTime);
+        GameSounds.ClockWarning(clockWarningSound, before, timeLeft, clockWarningTime);
         UpdateTimeFill();
         if (timeLeft <= 0.0f)
         {
-            Submit();
+            Finish(true);
             return;
         }
 
@@ -260,12 +273,18 @@ public class CodingMG : MinigameUI
         TypeChar(c);
     }
 
-    void TypeChar(char c)
+    void TypeChar(char c, bool silent = false)
     {
         if (typed.Count >= target.Length) return;
 
         typed.Add(c);
-        if (c == target[typed.Count - 1]) correctCount++;
+        bool right = (c == target[typed.Count - 1]);
+        if (right) correctCount++;
+        if (!silent)
+        {
+            if (right) keyRightSound?.Play();
+            else keyWrongSound?.Play();
+        }
         Changed();
     }
 
@@ -276,10 +295,12 @@ public class CodingMG : MinigameUI
         int n = 0;
         while ((n < tabSize) && (typed.Count < target.Length) && (target[typed.Count] == ' '))
         {
-            TypeChar(' ');
+            TypeChar(' ', true);
             n++;
         }
-        if (n == 0) TypeChar(' ');
+        // One key press, one sound, however many spaces it stood for
+        if (n > 0) keyRightSound?.Play();
+        else TypeChar(' ');
     }
 
     void Backspace()
@@ -289,6 +310,7 @@ public class CodingMG : MinigameUI
         int i = typed.Count - 1;
         if (typed[i] == target[i]) correctCount--;
         typed.RemoveAt(i);
+        backspaceSound?.Play();
         Changed();
     }
 
@@ -302,6 +324,12 @@ public class CodingMG : MinigameUI
 
     public void Submit()
     {
+        Finish(false);
+    }
+
+    // Hands the score in, whether the player submitted or the time ran out
+    void Finish(bool timedOut)
+    {
         if (codeDone) return;
 
         codeDone = true;
@@ -313,6 +341,8 @@ public class CodingMG : MinigameUI
         else Debug.LogWarning("CodingMG: no Player found to store the coding result", this);
 
         if (submitParticles != null) submitParticles.Play(true);
+        if (timedOut) timeUpSound?.Play();
+        else submitSound?.Play();
 
         UpdateUI();
         canvasGroup.FadeOut(0.1f);
