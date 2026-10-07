@@ -43,7 +43,7 @@ Next release, for the [Game Creators Club](https://game-creators-club.itch.io/):
 6. Improved painting minigame: paint with a brush, choosing brush size and pattern as well as color, to make
    it more fun. The game scores how well you painted: how much of the area inside the regions you actually
    covered, minus how much you painted outside them (done)
-7. Sounds (the list, and where each one is assigned, is in [sounds.md](sounds.md))
+7. Sounds (done)
 
 ## Future
 

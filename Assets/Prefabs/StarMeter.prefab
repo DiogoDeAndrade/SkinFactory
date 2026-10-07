@@ -106,6 +106,9 @@ MonoBehaviour:
   emptyColor: {r: 0.22, g: 0.22, b: 0.28, a: 1}
   popScale: 1.4
   popTime: 0.25
+  starGainedSound: {fileID: 11400000, guid: 29aacb9309e19fa4bbd47b65de7c56e9, type: 2}
+  starPitchStep: 0.1
+  starLostSound: {fileID: 11400000, guid: ff8209c961ed41a4bbb2586b8da538ba, type: 2}
 --- !u!1 &4930677927187424842
 GameObject:
   m_ObjectHideFlags: 0

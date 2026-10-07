@@ -28,6 +28,16 @@ public class Player : MonoBehaviour
     [SerializeField, Tooltip("Played when an idea is picked up")]
     private SoundDef    grabSound;
 
+    [Header("Footsteps")]
+    [SerializeField, Tooltip("Played when the player starts walking, then again every footstep distance")]
+    private SoundDef    footstepSound;
+    [SerializeField, Min(0.01f), Tooltip("Distance (XZ) walked between two footsteps")]
+    private float       footstepDistance = 2.5f;
+
+    Vector3 lastPosition;       // Where the player was last frame
+    float   walkedDistance;     // Since the last footstep
+    bool    wasMoving;
+
     public bool needNewInputSystem => (interactInput != null) && (interactInput.type == UC.InputControl.InputType.NewInput);
 
     // Interact key currently held (stations that need a hold, e.g. the release console)
@@ -155,6 +165,7 @@ public class Player : MonoBehaviour
 
         if (interactInput != null) interactInput.playerInput = playerInput;
         if (holdPoint == null) holdPoint = transform;
+        lastPosition = transform.position;
 
         if (!debugMode) return;
 
@@ -186,8 +197,36 @@ public class Player : MonoBehaviour
 
         animator.SetBool(workingID, (currentMinigame != null));
 
+        UpdateFootsteps();
+
         // Space is a character while a keyboard station has the controls
         if (!controlsLocked) UpdateIdeaInteraction();
+    }
+
+    // A footstep as the player sets off, then one every footstepDistance. The distance is what was actually
+    // covered, so pushing against a wall stays quiet after the first step.
+    void UpdateFootsteps()
+    {
+        Vector3 position = transform.position;
+        bool moving = movement.isMoving;
+
+        if (moving && !wasMoving)
+        {
+            walkedDistance = 0.0f;
+            footstepSound?.Play();
+        }
+        else if (moving)
+        {
+            walkedDistance += Vector3.Distance(position.x0z(), lastPosition.x0z());
+            if (walkedDistance >= footstepDistance)
+            {
+                walkedDistance %= footstepDistance;
+                footstepSound?.Play();
+            }
+        }
+
+        wasMoving = moving;
+        lastPosition = position;
     }
 
     // Highlights the nearest idea in range and the drop area the player stands in, if it takes the carried idea.

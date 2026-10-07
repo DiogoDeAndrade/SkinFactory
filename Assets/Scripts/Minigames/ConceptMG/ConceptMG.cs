@@ -32,6 +32,14 @@ public class ConceptMG : MinigameUI
     [SerializeField, Range(0, 1)] private float sketchAlphaThreshold = 0.1f;    // Sketch pixel counts as painted above this alpha
     [SerializeField, Range(0, 1)] private float minScoreToSubmit = 0.3f;        // Submit button is interactable from this score up
 
+    [Header("Station sounds")]
+    [SerializeField, Tooltip("Looping pencil sound: heard while a line is being drawn, faded out as soon as the pen stops or lifts")]
+    private AudioSource                         pencilSource;
+    [SerializeField, Range(0, 1), Tooltip("Volume of the pencil sound while drawing")]
+    private float                               pencilVolume = 1.0f;
+    [SerializeField, Min(0), Tooltip("Seconds for the pencil sound to fade out once the pen stops")]
+    private float                               pencilFadeTime = 0.1f;
+
 #if UNITY_EDITOR
     [Header("Debug (editor only)")]
     [SerializeField] private bool               saveDrawingOnSubmit = false;            // Writes the submitted drawing as a PNG
@@ -59,6 +67,7 @@ public class ConceptMG : MinigameUI
     bool        drawingEnabled;
     bool        wasPressed;
     Vector2Int  lastDrawPixel;
+    Vector2     lastPointerPosition;
     Coroutine   introCR;
     Canvas      canvas;
 
@@ -71,6 +80,7 @@ public class ConceptMG : MinigameUI
         base.Start();
 
         canvas = GetComponentInParent<Canvas>();
+        if (pencilSource != null) pencilSource.volume = 0.0f;
 
         Set(concept);
     }
@@ -209,18 +219,30 @@ public class ConceptMG : MinigameUI
 
     void Update()
     {
-        if (!drawingEnabled || drawImage == null || drawTexture == null) return;
+        GameSounds.StrokeLoop(pencilSource, UpdateDrawing(), pencilVolume, pencilFadeTime);
+    }
+
+    // Returns true on a frame where the pen is down on the drawing and moving (touching down counts, so a dot is
+    // heard too)
+    bool UpdateDrawing()
+    {
+        if (!drawingEnabled || drawImage == null || drawTexture == null) return false;
 
         var pointer = Pointer.current;
-        if (pointer == null) return;
+        if (pointer == null) return false;
+
+        bool stroking = false;
 
         if (pointer.press.isPressed)
         {
-            if (TryGetDrawPixel(pointer.position.ReadValue(), out var pixel))
+            Vector2 position = pointer.position.ReadValue();
+            if (TryGetDrawPixel(position, out var pixel))
             {
                 if (wasPressed) DrawLine(lastDrawPixel, pixel);
                 else DrawDot(pixel);
 
+                stroking = !wasPressed || (position != lastPointerPosition);
+                lastPointerPosition = position;
                 lastDrawPixel = pixel;
                 wasPressed = true;
             }
@@ -242,6 +264,8 @@ public class ConceptMG : MinigameUI
             drawDirty = false;
             UpdateScoreUI();
         }
+
+        return stroking;
     }
 
     #region Sketch analysis

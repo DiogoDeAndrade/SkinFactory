@@ -62,6 +62,10 @@ public class MarketingMG : MinigameUI
     [SerializeField] private SoundDef   waveOutSound;       // The wave's time is up and the survivors vanish
     [SerializeField] private SoundDef   postDeletedSound;   // A negative post removed
     [SerializeField] private SoundDef   wrongPostSound;     // A positive post removed by mistake
+    [SerializeField, Tooltip("Ticks once a second through the last seconds of each wave")]
+    private SoundDef                    clockWarningSound;
+    [SerializeField, Min(0), Tooltip("Seconds left in the wave when the clock warning starts")]
+    private float                       clockWarningTime = 3.0f;
 
     public int  stars => currentStars;
     public int  processed => processedCount;
@@ -132,7 +136,9 @@ public class MarketingMG : MinigameUI
 
         if (posts.Count > 0)
         {
+            float before = waveTimeLeft;
             waveTimeLeft -= Time.deltaTime;
+            GameSounds.ClockWarning(clockWarningSound, before, waveTimeLeft, clockWarningTime);
             if (waveFill != null) waveFill.fillAmount = (waveDuration > 0.0f) ? Mathf.Clamp01(waveTimeLeft / waveDuration) : 0.0f;
 
             if (waveTimeLeft <= 0.0f)

@@ -18,14 +18,11 @@ public class ReleaseStation : Minigame
     private Vector3     onRotation = new Vector3(0.0f, 0.0f, -55.0f);
 
     [Header("Sounds")]
-    [SerializeField, Tooltip("Plays while the lever is being pulled, its pitch rising with the pull; cut when the key is let go or the lever locks")]
+    [SerializeField, Tooltip("Plays while the lever is being pulled, its pitch rising with the pull, and again while it falls back after the key is let go, its pitch falling with it; cut when the lever is back at rest or locks")]
     private SoundDef    leverChargeSound;
     [SerializeField, Min(1), Tooltip("Pitch multiplier of the charge sound with the lever all the way (1 at rest)")]
     private float       leverChargeMaxPitch = 2.0f;
-    [SerializeField] private SoundDef leverDropSound;   // The key is let go before the lever is all the way
-    [SerializeField, Tooltip("The lever locks and the skin is released. Layered with the rise sound: plays only when both are assigned")]
-    private SoundDef    launchSound;
-    [SerializeField] private SoundDef launchRiseSound;
+    [SerializeField] private SoundDef launchSound;      // The lever locks and the skin is released
 
     // 0 = lever at rest, 1 = pulled all the way
     public float progress => Mathf.Clamp01(heldFor / holdTime);
@@ -82,18 +79,19 @@ public class ReleaseStation : Minigame
                 Fire();
             }
         }
-        else if (heldFor > 0.0f)
+        else
         {
-            // Falls back at a rate that takes releaseTime from fully pulled
-            float rate = (releaseTime > 0.0f) ? (holdTime / releaseTime) : float.MaxValue;
-            heldFor = Mathf.Max(0.0f, heldFor - rate * Time.deltaTime);
-        }
+            if (heldFor > 0.0f)
+            {
+                // Falls back at a rate that takes releaseTime from fully pulled
+                float rate = (releaseTime > 0.0f) ? (holdTime / releaseTime) : float.MaxValue;
+                heldFor = Mathf.Max(0.0f, heldFor - rate * Time.deltaTime);
+            }
 
-        // Let go before the end: the charge is cut and the lever drops. Not after a launch, which has its own sound.
-        if (wasPulling && !pulling && !fired)
-        {
-            StopCharge();
-            leverDropSound?.Play();
+            // Let go before the end: the charge sound again, its pitch now falling with the lever, until it is back
+            // at rest. Not after a launch, which has its own sound.
+            if (heldFor <= 0.0f) StopCharge();
+            else if (wasPulling && !fired) StartCharge();
         }
         wasPulling = pulling;
 
@@ -136,7 +134,7 @@ public class ReleaseStation : Minigame
         active = false;
 
         StopCharge();
-        GameSounds.PlayTogether(launchSound, launchRiseSound);
+        launchSound?.Play();
 
         if (LevelManager.instance != null) LevelManager.instance.Release();
         else Debug.LogWarning("ReleaseStation: no LevelManager in the scene", this);

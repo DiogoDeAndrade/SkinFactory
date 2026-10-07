@@ -82,6 +82,12 @@ public class PaintingMG : MinigameUI
     private float                               clockWarningTime = 5.0f;
     [SerializeField, Tooltip("The time ran out (instead of the submit sound)")]
     private SoundDef                            timeUpSound;
+    [SerializeField, Tooltip("Looping brush sound: heard while a stroke is being painted or erased, faded out as soon as the brush stops or lifts")]
+    private AudioSource                         brushSource;
+    [SerializeField, Range(0, 1), Tooltip("Volume of the brush sound while painting")]
+    private float                               brushVolume = 1.0f;
+    [SerializeField, Min(0), Tooltip("Seconds for the brush sound to fade out once the brush stops")]
+    private float                               brushFadeTime = 0.1f;
 
 #if UNITY_EDITOR
     [Header("Debug (editor only)")]
@@ -136,6 +142,7 @@ public class PaintingMG : MinigameUI
     bool            paintDone;
     int             strokeColor = noStroke; // What the stroke in progress paints
     Vector2Int      lastPixel;
+    Vector2         lastPointerPosition;
     Canvas          canvas;
 
     public int      selectedColorIndex => selectedColor;
@@ -158,6 +165,7 @@ public class PaintingMG : MinigameUI
 
         canvas = GetComponentInParent<Canvas>();
         if (player == null) player = FindAnyObjectByType<Player>();
+        if (brushSource != null) brushSource.volume = 0.0f;
 
         SetupBrushCursor();
         BuildSwatches();
@@ -319,9 +327,15 @@ public class PaintingMG : MinigameUI
 
     void Update()
     {
-        if (!paintingEnabled || paintDone || (paintImage == null) || (regionOf == null)) return;
+        GameSounds.StrokeLoop(brushSource, UpdatePainting(), brushVolume, brushFadeTime);
+    }
 
-        UpdateBrush();
+    // Returns true on a frame where the brush is down on the canvas and moving
+    bool UpdatePainting()
+    {
+        if (!paintingEnabled || paintDone || (paintImage == null) || (regionOf == null)) return false;
+
+        bool stroking = UpdateBrush();
 
         if (paintDirty)
         {
@@ -338,13 +352,15 @@ public class PaintingMG : MinigameUI
 
         // The clock only runs while painting; out of time, whatever is on the canvas is submitted.
         // No time at all (base and per area both zero) means no limit.
-        if (timeLimit <= 0.0f) return;
+        if (timeLimit <= 0.0f) return stroking;
 
         float before = timeLeft;
         timeLeft = Mathf.Max(0.0f, timeLeft - Time.deltaTime);
         GameSounds.ClockWarning(clockWarningSound, before, timeLeft, clockWarningTime);
         UpdateTimeFill();
         if (timeLeft <= 0.0f) Finish(true);
+
+        return stroking;
     }
 
     #region Model and regions
@@ -631,13 +647,15 @@ public class PaintingMG : MinigameUI
     }
 
     // Left button paints, right button erases; a held button draws a line from where the pointer was last frame.
-    // Leaving the canvas lifts the brush.
-    void UpdateBrush()
+    // Leaving the canvas lifts the brush. Returns true on a frame where the brush is down and moving (touching down
+    // counts, so a single dab is heard too).
+    bool UpdateBrush()
     {
         var mouse = Mouse.current;
-        if (mouse == null) return;
+        if (mouse == null) return false;
 
-        bool inside = TryGetPaintPixel(mouse.position.ReadValue(), out var pixel);
+        Vector2 position = mouse.position.ReadValue();
+        bool inside = TryGetPaintPixel(position, out var pixel);
         ShowBrushCursor(inside, pixel);
 
         int color = noStroke;
@@ -650,14 +668,19 @@ public class PaintingMG : MinigameUI
         if (color == noStroke)
         {
             strokeColor = noStroke;
-            return;
+            return false;
         }
+
+        bool stroking = (strokeColor != color) || (position != lastPointerPosition);
 
         if (strokeColor != color) Stamp(pixel, color);
         else if (pixel != lastPixel) StampLine(lastPixel, pixel, color);
 
         strokeColor = color;
         lastPixel = pixel;
+        lastPointerPosition = position;
+
+        return stroking;
     }
 
     void StampLine(Vector2Int from, Vector2Int to, int color)

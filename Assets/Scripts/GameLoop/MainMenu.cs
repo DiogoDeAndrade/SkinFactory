@@ -13,8 +13,15 @@ public class MainMenu : MonoBehaviour
     private CanvasGroup creditsGroup;
     [SerializeField]
     private BigTextScroll creditsScroller;
-    [SerializeField, Tooltip("Played when a menu option is chosen")]
+    [SerializeField]
     private SoundDef clickSound;
+    [SerializeField]
+    private SoundDef menuMusic;
+
+    private void Start()
+    {
+        menuMusic?.Play();
+    }
 
     public void StartGame()
     {

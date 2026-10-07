@@ -115,20 +115,18 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI    gameOverText;   // Optional, reason
 
     [Header("Sounds")]
+    [SerializeField] private SoundDef   gameMusic;          // The boss camera comes on
     [SerializeField] private SoundDef   intercomSound;          // The boss camera comes on
     [SerializeField, Tooltip("Voice blip repeated while the boss talks; give the SoundDef several clips or a pitch range for variety")]
     private SoundDef                    bossTalkSound;
     [SerializeField] private SoundDef   pitchAcceptedSound;     // With the boss's verdict line
     [SerializeField] private SoundDef   pitchRejectedSound;     // Same, when the pitch is rubbish (also when he gives up and picks himself)
     [SerializeField] private SoundDef   skinotronSound;         // The camera cuts to the Skinotron
-    [SerializeField] private SoundDef   dayWipeSound;           // The wipe into the next day
     [SerializeField, Tooltip("Ticks once a second through the last seconds of the day")]
     private SoundDef                    clockWarningSound;
     [SerializeField, Min(0), Tooltip("Seconds left in the day when the clock warning starts")]
     private float                       clockWarningTime = 10.0f;
-    [SerializeField, Tooltip("Game over, as the panel comes up. Followed by the tail sound: plays only when both are assigned")]
-    private SoundDef                    firedSound;
-    [SerializeField] private SoundDef   firedTailSound;
+    [SerializeField] private SoundDef   firedSound;             // Game over, as the panel comes up
 
     [Header("Events")]
     public UnityEvent<int>          onDayStarted;       // Day number
@@ -199,6 +197,8 @@ public class LevelManager : MonoBehaviour
         SetBossCamera(false);
         SetSkinCamera(false);
         StartCoroutine(FirstDayCR());
+
+        gameMusic?.Play();
     }
 
     // Wait a frame so every station has run its Start before the day resets them
@@ -504,7 +504,6 @@ public class LevelManager : MonoBehaviour
         if (player != null) player.LockControls(true);
 
         bool covered = false;
-        dayWipeSound?.Play();
         FullscreenWiper.WipeOut(dayWipeTime, dayWipeType, () => covered = true);
         while (!covered) yield return null;
 
@@ -550,7 +549,7 @@ public class LevelManager : MonoBehaviour
         yield return BossSpeechCR(false, null, firedLine);
 
         Time.timeScale = 0.0f;
-        GameSounds.PlayChain(this, firedSound, firedTailSound);
+        firedSound?.Play();
 
         if (gameOverText) gameOverText.text = reason;
         if (gameOverPanel)
